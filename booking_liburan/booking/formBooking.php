@@ -67,7 +67,7 @@ if (!$paket) {
             width: 100%;
             height: auto;
             max-height: 240px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 12px;
             display: block;
             margin: 0 auto;
