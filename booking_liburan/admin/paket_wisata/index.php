@@ -115,5 +115,4 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket DESC"
     </div>
     <script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
