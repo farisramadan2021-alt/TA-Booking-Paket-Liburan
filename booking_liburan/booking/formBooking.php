@@ -1,7 +1,19 @@
 <?php
 require_once '../config/koneksi.php';
 
-$id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
+$id_paket = isset($_GET['id']) ? intval($_GET['id']) : 2;
+
+$query = mysqli_query($conn, "SELECT * FROM paket_wisata WHERE id_paket = $id_paket");
+$paket = mysqli_fetch_assoc($query);
+
+if (!$paket) {
+    $paket = [
+        'nama_paket' => 'Paket Wisata Bali',
+        'deskripsi' => 'Nikmati liburan yang menyenangkan dengan berbagai destinasi menarik di Bali.',
+        'harga' => 1500000,
+        'gambar' => 'bali.jpg'
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +27,6 @@ $id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
         body {
             background: url('../uploads/paket_wisata/fotoBackground.jpeg') no-repeat center center fixed;
             -webkit-background-size: cover;
-            -moz-background-size: cover;
             -moz-background-size: cover;
             background-size: cover;
             min-height: 100vh;
@@ -56,7 +67,7 @@ $id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
             width: 100%;
             height: auto;
             max-height: 240px;
-            object-fit: contain;
+            object-fit: cover;
             border-radius: 12px;
             display: block;
             margin: 0 auto;
@@ -69,35 +80,36 @@ $id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
     <div class="container mt-5 pb-5">
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 mb-4 mb-md-0">
                 <div class="card shadow-lg h-100">
                     <div class="card-header text-center card-header-custom py-3">
                         <h3>Booking Paket Wisata</h3>
                         <p class="mb-0 text-light small">Isi data perjalanan Anda dan pesan paket wisata pilihan Anda</p>
                     </div>
                     <div class="card-body">
+                        <form action="proses_booking.php" method="POST">
+            
+                            <input type="hidden" name="id_paket" value="<?= $id_paket; ?>">
 
-
-                        <form>
                             <div class="mb-3">
-                                <label for="nama" class="form-label fw-smibold text-secondary">Nama Lengkap</label>
+                                <label for="nama" class="form-label fw-semibold text-secondary">Nama Lengkap</label>
                                 <input type="text" id="nama" name="nama" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label fw-smibold text-secondary">Email</label>
+                                <label for="email" class="form-label fw-semibold text-secondary">Email</label>
                                 <input type="email" id="email" name="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="tel" class="form-label fw-smibold text-secondary">Nomer Telephone</label>
-                                <input type="tel" id="tlp" name="tlp" class="form-control" pattern="[0-9] {10-13}" title="Isi nomor telephone dengan benar" required>
+                                <label for="tlp" class="form-label fw-semibold text-secondary">Nomor Telepon</label>
+                                <input type="tel" id="tlp" name="tlp" class="form-control" pattern="[0-9]{10,13}" title="Isi nomor telephone dengan benar (10-13 digit angka)" required>
                             </div>
                             <div class="mb-3">
-                                <label for="tanggal" class="form-label fw-smibold text-secondary">Tanggal Keberangkatan</label>
+                                <label for="tanggal" class="form-label fw-semibold text-secondary">Tanggal Keberangkatan</label>
                                 <input type="date" id="tanggal" name="tanggal" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="jumlah_peserta" class="form-label fw-smibold text-secondary">Jumlah Peserta</label>
-                                <input type="number" id="jumlah_peserta" name="jumlah_peserta" min="1" class="form-control" required>
+                                <label for="jumlah_peserta" class="form-label fw-semibold text-secondary">Jumlah Peserta</label>
+                                <input type="number" id="jumlah_peserta" name="jumlah_peserta" min="1" value="1" class="form-control" required>
                             </div>
                             <button type="submit" class="btn btn-custom text-white py-2 fw-bold w-100">
                                 Booking Sekarang
@@ -106,39 +118,40 @@ $id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
                     </div>
                 </div>
             </div>
+            
             <div class="col-md-6">
-
                 <div class="card shadow-lg h-100">
-
                     <div class="card-header card-header-custom text-center py-3">
                         <h3 class="mb-0">Detail Paket Wisata</h3>
                     </div>
 
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
-                            <h4 class="text-center fw-bold text-primary mb-2">Paket Wisata</h4>
+                            <h4 class="text-center fw-bold text-primary mb-2"><?= htmlspecialchars($paket['nama_paket']); ?></h4>
 
                             <p class="text-muted text-center mb-4">
-                                Nikmati liburan yang menyenangkan dengan <br>
-                                berbagai destinasi menarik di Bali.
+                                <?= nl2br(htmlspecialchars($paket['deskripsi'])); ?>
                             </p>
+                            
                             <div class="text-center mb-4">
-                                <img src="../uploads/paket_wisata/bali.jpg"
+                                <img src="../uploads/paket_wisata/<?= htmlspecialchars($paket['gambar']); ?>"
                                     class="gambar-paket shadow-sm"
-                                    alt="Paket Wisata Bali">
-
+                                    alt="<?= htmlspecialchars($paket['nama_paket']); ?>">
                             </div>
                         </div>
+                        
                         <div>
                             <hr>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="text-secondary">Harga Per Orang</span>
-                                <strong class="fs-5 text-dark">1.500.000</strong>
+                                <strong class="fs-5 text-dark" id="harga-satuan" data-harga="<?= $paket['harga']; ?>">
+                                    Rp <?= number_format($paket['harga'], 0, ',', '.'); ?>
+                                </strong>
                             </div>
                             <hr>
                             <div class="bg-light p-3 rounded-3 border">
-                            <p class="mb-1 text-muted small">Total Biaya</p>
-                            <h3 id="total" class="text-primary fw-bold mb-0">Rp 0</h3>
+                                <p class="mb-1 text-muted small">Total Biaya</p>
+                                <h3 id="total" class="text-primary fw-bold mb-0">Rp 0</h3>
                             </div>
                         </div>
                     </div>
@@ -146,6 +159,28 @@ $id_paket = isset($_GET['id']) ? $_GET['id'] : 2;
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputJumlahPeserta = document.getElementById('jumlah_peserta');
+            const elementHargaSatuan = document.getElementById('harga-satuan');
+            const elementTotal = document.getElementById('total');
+
+            const hargaPerOrang = parseInt(elementHargaSatuan.getAttribute('data-harga')) || 0;
+
+            function hitungTotal() {
+                const jumlahPeserta = parseInt(inputJumlahPeserta.value) || 0;
+                
+                const totalBiaya = hargaPerOrang * jumlahPeserta;
+
+                elementTotal.textContent = 'Rp ' + totalBiaya.toLocaleString('id-ID');
+            }
+
+            hitungTotal();
+
+            inputJumlahPeserta.addEventListener('input', hitungTotal);
+        });
+    </script>
 </body>
 
 </html>
