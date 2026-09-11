@@ -11,62 +11,6 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket DESC"
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Paket Wisata</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f7fa;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        .btn-tambah {
-            display: inline-block;
-            padding: 10px 15px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #007bff;
-            color: white;
-        }
-
-        .edit {
-            background: #ffc107;
-            color: black;
-            padding: 6px 10px;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-
-        .hapus {
-            background: #dc3545;
-            color: white;
-            padding: 6px 10px;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-    </style>
 </head>
 
 <body>
