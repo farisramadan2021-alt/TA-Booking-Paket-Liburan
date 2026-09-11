@@ -5,9 +5,9 @@ $user = "root";
 $password = "";
 $database = "booking_liburan";
 
-$koneksi = mysqli_connect($host, $user, $password, $database);
+$conn = mysqli_connect($host, $user, $password, $database);
 
-if (!$koneksi) {
+if (!$conn) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 ?>
