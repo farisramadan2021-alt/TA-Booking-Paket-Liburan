@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket DESC");
+$query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC");
 ?>
 
 <!DOCTYPE html>
