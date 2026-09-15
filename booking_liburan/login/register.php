@@ -1,35 +1,36 @@
 <?php
+
 $host = "127.0.0.1";
 $user = "root";
 $password = "";
 $database = "booking_liburan";
 
-$koneksi = mysqli_connect($host, $user, $password, $database);
+$conn = mysqli_connect($host, $user, $password, $database);
 
-if (!$koneksi) {
+if (!$conn) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 if (isset($_POST['register'])) {
-    $nama       = mysqli_real_escape_string($koneksi, $_POST['nama']);
-    $email      = mysqli_real_escape_string($koneksi, $_POST['email']);
+    $nama       = mysqli_real_escape_string($conn, $_POST['nama']);
+    $email      = mysqli_real_escape_string($conn, $_POST['email']);
     $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $no_hp      = mysqli_real_escape_string($koneksi, $_POST['no_hp']);
-    $alamat     = mysqli_real_escape_string($koneksi, $_POST['alamat']);
+    $no_hp      = mysqli_real_escape_string($conn, $_POST['no_hp']);
+    $alamat     = mysqli_real_escape_string($conn, $_POST['alamat']);
     $role       = 'pelanggan';
     $created_at = date('Y-m-d H:i:s');
     $updated_at = date('Y-m-d H:i:s');
 
-    $cek_email = mysqli_query($koneksi, "SELECT * FROM user WHERE email = '$email'");
+    $cek_email = mysqli_query($conn, "SELECT * FROM user WHERE email = '$email'");
     if (mysqli_num_rows($cek_email) > 0) {
         echo "<script>alert('Email sudah terdaftar!');</script>";
     } else {
         $sql = "INSERT INTO user (nama, email, password, no_hp, alamat, role, created_at, updated_at) 
                 VALUES ('$nama', '$email', '$password', '$no_hp', '$alamat', '$role', '$created_at', '$updated_at')";
         
-        if (mysqli_query($koneksi, $sql)) {
+        if (mysqli_query($conn, $sql)) {
             echo "<script>alert('Registrasi berhasil! Silakan login.'); location.href='login.php';</script>";
         } else {
-            echo "Error: " . mysqli_error($koneksi);
+            echo "Error: " . mysqli_error($conn);
         }
     }
 }
