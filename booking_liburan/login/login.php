@@ -11,7 +11,7 @@ if (!$koneksi) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
-/** @var mysqli $koneksi */ // <-- Tambahkan baris ini
+/** @var mysqli $koneksi */
 
 $error = false;
 
@@ -30,8 +30,15 @@ if (isset($_POST['login'])) {
             $_SESSION['nama']    = $row['nama'];
             $_SESSION['role']    = $row['role'];
 
-            header("Location: dashboard.php");
-            exit;
+            if ($row['role'] === 'admin') {
+                header("Location: ../admin/dashboard.php");
+                exit;
+            }
+
+            if ($row['role'] === 'pelanggan') {
+                header("Location: ../user/dashboard.php");
+                exit;
+            }
         }
     }
 

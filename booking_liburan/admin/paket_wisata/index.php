@@ -6,12 +6,14 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Paket Wisata</title>
     <link rel="stylesheet" href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -21,9 +23,15 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
                     Kelola data paket wisata yang tersedia
                 </p>
             </div>
-            <a href="tambah.php" class="btn btn-primary">
-                + Tambah Paket Wisata
-            </a>
+            <div class="d-flex gap-2">
+                <a href="../dashboard.php" class="btn btn-secondary">
+                     Kembali ke Dashboard
+                </a>
+
+                <a href="tambah.php" class="btn btn-primary">
+                    + Tambah Paket Wisata
+                </a>
+            </div>
         </div>
         <div class="card shadow-sm border-0">
             <div class="card-body">
@@ -115,4 +123,5 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
     </div>
     <script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
