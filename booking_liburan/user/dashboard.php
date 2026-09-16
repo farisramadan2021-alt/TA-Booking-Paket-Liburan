@@ -24,7 +24,7 @@ if ($_SESSION['role'] !== 'pelanggan') {
     <nav class="navbar navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand fw-bold" href="dashboard.php">
-                Booking Liburan
+                RPBNusa
             </a>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white">
@@ -53,8 +53,7 @@ if ($_SESSION['role'] !== 'pelanggan') {
                         <p class="card-text text-muted">
                             Lihat berbagai paket wisata yang tersedia.
                         </p>
-                        <a href="../admin/paket_wisata/index.php"
-                           class="btn btn-primary">
+                        <a href="paket_wisata/index.php" class="btn btn-primary">
                             Lihat Paket Wisata
                         </a>
                     </div>

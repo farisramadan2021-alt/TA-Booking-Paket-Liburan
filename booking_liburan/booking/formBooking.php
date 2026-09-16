@@ -88,7 +88,7 @@ if (!$paket) {
                     </div>
                     <div class="card-body">
                         <form action="proses_booking.php" method="POST">
-            
+
                             <input type="hidden" name="id_paket" value="<?= $id_paket; ?>">
 
                             <div class="mb-3">
@@ -114,11 +114,14 @@ if (!$paket) {
                             <button type="submit" class="btn btn-custom text-white py-2 fw-bold w-100">
                                 Booking Sekarang
                             </button>
+                            <a href="../user/paket_wisata/index.php" class="btn btn-secondary w-100 mt-2">
+                                Kembali ke Paket Wisata
+                            </a>
                         </form>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card shadow-lg h-100">
                     <div class="card-header card-header-custom text-center py-3">
@@ -132,14 +135,14 @@ if (!$paket) {
                             <p class="text-muted text-center mb-4">
                                 <?= nl2br(htmlspecialchars($paket['deskripsi'])); ?>
                             </p>
-                            
+
                             <div class="text-center mb-4">
                                 <img src="../uploads/paket_wisata/<?= htmlspecialchars($paket['gambar']); ?>"
                                     class="gambar-paket shadow-sm"
                                     alt="<?= htmlspecialchars($paket['nama_paket']); ?>">
                             </div>
                         </div>
-                        
+
                         <div>
                             <hr>
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -161,7 +164,7 @@ if (!$paket) {
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const inputJumlahPeserta = document.getElementById('jumlah_peserta');
             const elementHargaSatuan = document.getElementById('harga-satuan');
             const elementTotal = document.getElementById('total');
@@ -170,7 +173,7 @@ if (!$paket) {
 
             function hitungTotal() {
                 const jumlahPeserta = parseInt(inputJumlahPeserta.value) || 0;
-                
+
                 const totalBiaya = hargaPerOrang * jumlahPeserta;
 
                 elementTotal.textContent = 'Rp ' + totalBiaya.toLocaleString('id-ID');

@@ -22,7 +22,7 @@ require_once __DIR__ . "/../config/koneksi.php";
         <div class="container">
 
             <a class="navbar-brand fw-bold" href="dashboard.php">
-                Booking Liburan
+                RPBNusa
             </a>
 
             <div class="d-flex align-items-center">
