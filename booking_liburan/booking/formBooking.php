@@ -1,18 +1,45 @@
 <?php
+session_start();
+
 require_once '../config/koneksi.php';
 
-$id_paket = isset($_GET['id']) ? intval($_GET['id']) : 2;
+// Pastikan user sudah login
+if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
+    header("Location: ../login/login.php");
+    exit;
+}
 
-$query = mysqli_query($conn, "SELECT * FROM paket_wisata WHERE id_paket = $id_paket");
+// Ambil ID paket dari URL
+if (!isset($_GET['id'])) {
+    header("Location: ../user/paket_wisata/index.php");
+    exit;
+}
+
+$id_paket = intval($_GET['id']);
+
+// Ambil data paket dari database
+$query = mysqli_query(
+    $conn,
+    "SELECT * FROM paket_wisata WHERE id_paket = $id_paket"
+);
+
 $paket = mysqli_fetch_assoc($query);
 
+$query_jadwal = mysqli_query(
+    $conn,
+    "SELECT * FROM jadwal_keberangkatan
+     WHERE id_paket = $id_paket
+     AND status = 'Tersedia'
+     AND sisa_kuota > 0
+     ORDER BY tanggal_keberangkatan ASC"
+);
+
 if (!$paket) {
-    $paket = [
-        'nama_paket' => 'Paket Wisata Bali',
-        'deskripsi' => 'Nikmati liburan yang menyenangkan dengan berbagai destinasi menarik di Bali.',
-        'harga' => 1500000,
-        'gambar' => 'bali.jpg'
-    ];
+    echo "<script>
+            alert('Paket wisata tidak ditemukan.');
+            window.location.href = '../user/paket_wisata/index.php';
+          </script>";
+    exit;
 }
 ?>
 
@@ -104,8 +131,16 @@ if (!$paket) {
                                 <input type="tel" id="tlp" name="tlp" class="form-control" pattern="[0-9]{10,13}" title="Isi nomor telephone dengan benar (10-13 digit angka)" required>
                             </div>
                             <div class="mb-3">
-                                <label for="tanggal" class="form-label fw-semibold text-secondary">Tanggal Keberangkatan</label>
-                                <input type="date" id="tanggal" name="tanggal" class="form-control" required>
+                                <label for="tanggal" class="form-label fw-semibold text-secondary">
+                                    Tanggal Keberangkatan
+                                </label>
+
+                                <input type="date"
+                                    id="tanggal"
+                                    name="tanggal"
+                                    class="form-control"
+                                    min="<?= date('Y-m-d'); ?>"
+                                    required>
                             </div>
                             <div class="mb-3">
                                 <label for="jumlah_peserta" class="form-label fw-semibold text-secondary">Jumlah Peserta</label>

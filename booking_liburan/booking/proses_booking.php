@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require_once '../config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -43,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $harga = $paket['harga'];
 
-    $total_harga = $harga * $jumlah_peserta;
+// Hitung total harga
+$total_harga = $harga * $jumlah_peserta;
 
     $id_user = 1;
 

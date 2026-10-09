@@ -21,7 +21,7 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paket Wisata - Booking Liburan</title>
+    <title>Paket Wisata - RPBNusa</title>
     <link rel="stylesheet" href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
