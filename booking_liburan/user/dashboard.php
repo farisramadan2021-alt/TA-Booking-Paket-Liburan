@@ -356,7 +356,7 @@ $query = mysqli_query(
                                     <div class="mt-auto pt-3">
 
                                         <a
-                                            href="../booking/formBooking.php?id_paket=<?= $paket['id_paket']; ?>"
+                                            href="../booking/formBooking.php?id=<?= $paket['id_paket']; ?>"
                                             class="btn text-white w-100"
                                             style="background-color: #2196F3;">
 

@@ -18,12 +18,14 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paket Wisata - RPBNusa</title>
     <link rel="stylesheet" href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 </head>
+
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-primary">
         <div class="container">
@@ -65,7 +67,7 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
                                     alt="<?= htmlspecialchars($data['nama_paket']); ?>">
                             <?php else: ?>
                                 <div class="bg-secondary text-white d-flex align-items-center justify-content-center"
-                                     style="height: 220px;">
+                                    style="height: 220px;">
                                     Tidak ada gambar
                                 </div>
                             <?php endif; ?>
@@ -86,10 +88,12 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
                                     <?= htmlspecialchars($data['deskripsi']); ?>
                                 </p>
                                 <div class="mt-auto">
+
                                     <a href="../../booking/formBooking.php?id=<?= $data['id_paket']; ?>"
-                                       class="btn btn-primary w-100">
+                                        class="btn btn-primary w-100">
                                         Booking Sekarang
                                     </a>
+
                                 </div>
                             </div>
                         </div>
@@ -106,4 +110,5 @@ $query = mysqli_query($conn, "SELECT * FROM paket_wisata ORDER BY id_paket ASC")
     </div>
     <script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
