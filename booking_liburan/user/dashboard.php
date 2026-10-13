@@ -281,9 +281,9 @@ $query = mysqli_query(
 
                                 <!-- Gambar -->
                                 <div class="ratio ratio-16x9">
-
+                                    
                                     <?php if (!empty($paket['gambar'])): ?>
-
+                                    
                                         <img
                                             src="../uploads/paket_wisata/<?= htmlspecialchars($paket['gambar']); ?>"
                                             class="card-img-top object-fit-cover rounded-top"
@@ -294,23 +294,24 @@ $query = mysqli_query(
                                         <div class="d-flex align-items-center justify-content-center bg-secondary text-white rounded-top">
                                             Tidak ada gambar
                                         </div>
-
+                                      
                                     <?php endif; ?>
-
+                                
                                 </div>
 
 
                                 <!-- Isi Card -->
                                 <div class="card-body d-flex flex-column">
-
+                                 
                                     <h5 class="card-title fw-bold"
                                         style="color: #0D47A1;">
 
                                         <?= htmlspecialchars($paket['nama_paket']); ?>
 
                                     </h5>
-
-
+                                   <a href="../booking/formBooking.php?id=<?= $paket['id_paket']; ?>"
+                                        
+                                    </a>
                                     <p class="mb-2 text-secondary">
 
                                         📍
