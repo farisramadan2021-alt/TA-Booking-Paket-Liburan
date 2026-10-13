@@ -95,7 +95,7 @@ if ($query_booking) {
             alert('Booking berhasil disimpan!');
             window.location.href = '../user/riwayat_booking.php';
           </script>";
-
+ 
 } else {
 
     echo "<script>
