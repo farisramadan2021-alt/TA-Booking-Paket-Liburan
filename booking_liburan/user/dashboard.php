@@ -156,7 +156,7 @@ $query = mysqli_query(
                     <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow">
 
                         <img
-                            src="../uploads/paket_wisata/bali.jpg"
+                            src="../uploads/paket_wisata/lucu.png"
                             class="img-fluid object-fit-cover"
                             alt="Destinasi wisata">
 
