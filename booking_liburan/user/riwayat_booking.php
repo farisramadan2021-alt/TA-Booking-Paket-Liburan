@@ -74,6 +74,7 @@ if (!$query) {
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-dark navbar-custom">
@@ -122,6 +123,7 @@ if (!$query) {
                                     <th>Peserta</th>
                                     <th>Total Harga</th>
                                     <th>Status</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -187,6 +189,17 @@ if (!$query) {
                                                 </span>
                                             <?php endif; ?>
                                         </td>
+
+                                        <td>
+                                            <?php if ($booking['status_booking'] === 'Dikonfirmasi'): ?>
+                                                <a href="pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+                                                    class="btn btn-primary btn-sm">
+                                                    Bayar Sekarang
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-muted">Belum tersedia</span>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -211,4 +224,5 @@ if (!$query) {
         <?php endif; ?>
     </div>
 </body>
+
 </html>

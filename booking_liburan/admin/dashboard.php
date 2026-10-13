@@ -106,7 +106,16 @@ require_once __DIR__ . "/../config/koneksi.php";
                         </h6>
 
                         <h2 class="fw-bold">
-                            0
+                            <?php
+                            $query_pengguna = mysqli_query(
+                                $conn,
+                                "SELECT COUNT(*) AS total FROM `user`"
+                            );
+
+                            $pengguna = mysqli_fetch_assoc($query_pengguna);
+
+                            echo $pengguna['total'];
+                            ?>
                         </h2>
 
                         <a href="pengguna/index.php"
@@ -132,10 +141,19 @@ require_once __DIR__ . "/../config/koneksi.php";
                             Booking
                         </h6>
 
-                        <h2 class="fw-bold">
-                            0
-                        </h2>
 
+                        <h2 class="fw-bold">
+                            <?php
+                            $query_booking = mysqli_query(
+                                $conn,
+                                "SELECT COUNT(*) AS total FROM booking"
+                            );
+
+                            $booking = mysqli_fetch_assoc($query_booking);
+
+                            echo $booking['total'];
+                            ?>
+                        </h2>
                         <a href="booking/index.php"
                             class="btn btn-primary btn-sm">
                             Kelola Booking

@@ -149,7 +149,7 @@ if (!$paket) {
                             <button type="submit" class="btn btn-custom text-white py-2 fw-bold w-100">
                                 Booking Sekarang
                             </button>
-                            <a href="../user/paket_wisata/index.php" class="btn btn-secondary w-100 mt-2">
+                            <a href="../user/dashboard.php" class="btn btn-secondary w-100 mt-2">
                                 Kembali ke Paket Wisata
                             </a>
                         </form>

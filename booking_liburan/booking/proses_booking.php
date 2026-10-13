@@ -3,97 +3,104 @@ session_start();
 
 require_once '../config/koneksi.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Pastikan user sudah login
+if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
+    header("Location: ../login/login.php");
+    exit;
+}
 
-    $id_paket       = (int) $_POST['id_paket'];
-    $nama           = mysqli_real_escape_string($conn, $_POST['nama']);
-    $email          = mysqli_real_escape_string($conn, $_POST['email']);
-    $tlp            = mysqli_real_escape_string($conn, $_POST['tlp']);
-    $tanggal        = mysqli_real_escape_string($conn, $_POST['tanggal']);
-    $jumlah_peserta = (int) $_POST['jumlah_peserta'];
+// Pastikan data dikirim melalui POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: ../user/paket_wisata/index.php");
+    exit;
+}
 
-    // Validasi data
-    if (
-        $id_paket <= 0 ||
-        empty($nama) ||
-        empty($email) ||
-        empty($tlp) ||
-        empty($tanggal) ||
-        $jumlah_peserta <= 0
-    ) {
-        echo "<script>
-                alert('Data booking belum lengkap.');
-                window.history.back();
-              </script>";
-        exit();
-    }
+// Ambil data dari form
+$id_user = (int) $_SESSION['id_user'];
+$id_paket = isset($_POST['id_paket']) ? (int) $_POST['id_paket'] : 0;
+$tanggal_keberangkatan = isset($_POST['tanggal']) ? $_POST['tanggal'] : '';
+$jumlah_peserta = isset($_POST['jumlah_peserta']) ? (int) $_POST['jumlah_peserta'] : 0;
 
-    $query_paket = mysqli_query(
-        $conn,
-        "SELECT * FROM paket_wisata WHERE id_paket = $id_paket"
-    );
+// Validasi
+if ($id_paket <= 0 || empty($tanggal_keberangkatan) || $jumlah_peserta <= 0) {
+    echo "<script>
+            alert('Data booking belum lengkap.');
+            window.history.back();
+          </script>";
+    exit;
+}
 
-    $paket = mysqli_fetch_assoc($query_paket);
+// Pastikan tanggal tidak boleh sebelum hari ini
+if ($tanggal_keberangkatan < date('Y-m-d')) {
+    echo "<script>
+            alert('Tanggal keberangkatan tidak boleh sebelum hari ini.');
+            window.history.back();
+          </script>";
+    exit;
+}
 
-    if (!$paket) {
-        echo "<script>
-                alert('Paket wisata tidak ditemukan.');
-                window.history.back();
-              </script>";
-        exit();
-    }
+// Ambil data paket
+$query_paket = mysqli_query(
+    $conn,
+    "SELECT * FROM paket_wisata
+     WHERE id_paket = $id_paket
+     AND status = 'Aktif'"
+);
 
-    $harga = $paket['harga'];
+$paket = mysqli_fetch_assoc($query_paket);
+
+if (!$paket) {
+    echo "<script>
+            alert('Paket wisata tidak ditemukan atau sudah tidak aktif.');
+            window.history.back();
+          </script>";
+    exit;
+}
+
+// Ambil harga paket
+$harga = (float) $paket['harga'];
 
 // Hitung total harga
 $total_harga = $harga * $jumlah_peserta;
 
-    $id_user = 1;
+// Status awal booking
+$status_booking = 'Menunggu';
 
-    $status = 'Menunggu';
+// Simpan booking
+$query_booking = mysqli_query(
+    $conn,
+    "INSERT INTO booking
+    (
+        id_user,
+        id_paket,
+        tanggal_keberangkatan,
+        jumlah_peserta,
+        total_harga,
+        status_booking
+    )
+    VALUES
+    (
+        $id_user,
+        $id_paket,
+        '$tanggal_keberangkatan',
+        $jumlah_peserta,
+        $total_harga,
+        '$status_booking'
+    )"
+);
 
-    $query_simpan = mysqli_query(
-        $conn,
-        "INSERT INTO booking
-        (
-            id_user,
-            id_paket,
-            tanggal_booking,
-            tanggal_keberangkatan,
-            jumlah_peserta,
-            total_harga,
-            status_booking
-        )
-        VALUES
-        (
-            '$id_user',
-            '$id_paket',
-            NOW(),
-            '$tanggal',
-            '$jumlah_peserta',
-            '$total_harga',
-            '$status'
-        )"
-    );
+if ($query_booking) {
 
-    if ($query_simpan) {
-
-        echo "<script>
-                alert('Pemesanan berhasil disimpan ke database.');
-                window.location.href = 'formBooking.php?id=$id_paket';
-              </script>";
-
-    } else {
-
-        echo "<script>
-                alert('Gagal menyimpan booking: " . mysqli_error($conn) . "');
-                window.history.back();
-              </script>";
-    }
-
+    echo "<script>
+            alert('Booking berhasil disimpan!');
+            window.location.href = '../user/riwayat_booking.php';
+          </script>";
+ 
 } else {
 
-    header('Location: formBooking.php');
-    exit();
+    echo "<script>
+            alert('Booking gagal disimpan: " . addslashes(mysqli_error($conn)) . "');
+            window.history.back();
+          </script>";
 }
 ?>
