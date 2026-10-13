@@ -108,7 +108,7 @@ if (!$user) {
 
                 <!-- Tombol Aksi -->
                 <div class="d-flex gap-2">
-                    <a href="../index.php" class="btn btn-outline-secondary w-50">
+                    <a href="../user/dashboard.php" class="btn btn-outline-secondary w-50">
                         <i class="bi bi-arrow-left me-1"></i> Kembali
                     </a>
                     <a href="edit_profil.php" class="btn btn-primary w-50">
