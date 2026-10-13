@@ -94,8 +94,7 @@ $query = mysqli_query(
     <!-- Nama user dipasang link ke profil.php -->
     <a href="../login/profil.php" class="text-white fw-bold text-decoration-underline-hover me-2" style="text-decoration: none;">
         <?= htmlspecialchars($_SESSION['nama'] ?? 'Pengguna'); ?>
-    </a>
-    <a href="logout.php" class="btn btn-light btn-sm">Logout</a>
+    </a><a href="../logout.php" class="btn btn-light btn-sm">Logout</a>
 </div>
 
                 </div>
