@@ -89,19 +89,14 @@ $query = mysqli_query(
 
                 </ul>
 
-                <div class="d-flex align-items-center gap-3">
-
-                    <span class="text-white">
-                        Halo,
-                        <strong>
-                            <?= htmlspecialchars($_SESSION['nama']); ?>
-                        </strong>
-                    </span>
-
-                    <a href="../logout.php"
-                        class="btn btn-light btn-sm">
-                        Logout
-                    </a>
+                <div class="d-flex align-items-center gap-2 text-white">
+    <span>Halo,</span>
+    <!-- Nama user dipasang link ke profil.php -->
+    <a href="../login/profil.php" class="text-white fw-bold text-decoration-underline-hover me-2" style="text-decoration: none;">
+        <?= htmlspecialchars($_SESSION['nama'] ?? 'Pengguna'); ?>
+    </a>
+    <a href="logout.php" class="btn btn-light btn-sm">Logout</a>
+</div>
 
                 </div>
 
@@ -286,9 +281,9 @@ $query = mysqli_query(
 
                                 <!-- Gambar -->
                                 <div class="ratio ratio-16x9">
-
+                                    
                                     <?php if (!empty($paket['gambar'])): ?>
-
+                                    
                                         <img
                                             src="../uploads/paket_wisata/<?= htmlspecialchars($paket['gambar']); ?>"
                                             class="card-img-top object-fit-cover rounded-top"
@@ -299,23 +294,24 @@ $query = mysqli_query(
                                         <div class="d-flex align-items-center justify-content-center bg-secondary text-white rounded-top">
                                             Tidak ada gambar
                                         </div>
-
+                                      
                                     <?php endif; ?>
-
+                                
                                 </div>
 
 
                                 <!-- Isi Card -->
                                 <div class="card-body d-flex flex-column">
-
+                                 
                                     <h5 class="card-title fw-bold"
                                         style="color: #0D47A1;">
 
                                         <?= htmlspecialchars($paket['nama_paket']); ?>
 
                                     </h5>
-
-
+                                   <a href="../booking/formBooking.php?id=<?= $paket['id_paket']; ?>"
+                                        
+                                    </a>
                                     <p class="mb-2 text-secondary">
 
                                         📍
