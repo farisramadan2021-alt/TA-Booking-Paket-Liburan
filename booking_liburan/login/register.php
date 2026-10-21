@@ -10,27 +10,39 @@ $conn = mysqli_connect($host, $user, $password, $database);
 if (!$conn) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
-if (isset($_POST['register'])) {
-    $nama       = mysqli_real_escape_string($conn, $_POST['nama']);
-    $email      = mysqli_real_escape_string($conn, $_POST['email']);
-    $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $no_hp      = mysqli_real_escape_string($conn, $_POST['no_hp']);
-    $alamat     = mysqli_real_escape_string($conn, $_POST['alamat']);
-    $role       = 'pelanggan';
-    $created_at = date('Y-m-d H:i:s');
-    $updated_at = date('Y-m-d H:i:s');
+$error = ''; // Variabel untuk menampung pesan kesalahan
 
-    $cek_email = mysqli_query($conn, "SELECT * FROM user WHERE email = '$email'");
+if (isset($_POST['register'])) {
+    $nama          = mysqli_real_escape_string($conn, $_POST['nama']);
+    $email         = mysqli_real_escape_string($conn, $_POST['email']);
+    $password_raw  = $_POST['password'];
+    $konfirmasi    = $_POST['konfirmasi_password'];
+    $role          = 'pelanggan';
+    $created_at    = date('Y-m-d H:i:s');
+    $updated_at    = date('Y-m-d H:i:s');
+
+    // 1. Cek apakah email sudah terdaftar di database
+    $cek_email = mysqli_query($conn, "SELECT email FROM user WHERE email = '$email'");
+    
     if (mysqli_num_rows($cek_email) > 0) {
-        echo "<script>alert('Email sudah terdaftar!');</script>";
-    } else {
-        $sql = "INSERT INTO user (nama, email, password, no_hp, alamat, role, created_at, updated_at) 
-                VALUES ('$nama', '$email', '$password', '$no_hp', '$alamat', '$role', '$created_at', '$updated_at')";
+        $error = "Email sudah terdaftar!";
+    } 
+    // 2. Cek apakah konfirmasi password cocok
+    elseif ($password_raw !== $konfirmasi) {
+        $error = "Konfirmasi password tidak cocok!";
+    } 
+    // 3. Jika tidak ada error, lakukan simpan data ke database
+    else {
+        $password = password_hash($password_raw, PASSWORD_DEFAULT);
         
-        if (mysqli_query($conn, $sql)) {
-            echo "<script>alert('Registrasi berhasil! Silakan login.'); location.href='login.php';</script>";
+        $query = "INSERT INTO user (nama, email, password, role, created_at, updated_at) 
+                  VALUES ('$nama', '$email', '$password', '$role', '$created_at', '$updated_at')";
+        
+        if (mysqli_query($conn, $query)) {
+            header("Location: login.php?pesan=berhasil");
+            exit;
         } else {
-            echo "Error: " . mysqli_error($conn);
+            $error = "Gagal mendaftar, silakan coba lagi.";
         }
     }
 }
@@ -182,15 +194,21 @@ if (isset($_POST['register'])) {
         <div class="register-section">
             <h2>Sign Up</h2>
 
-            <form method="POST" action="">
-                <input type="text" name="nama" class="input-box" placeholder="Nama Lengkap" required>
-                <input type="email" name="email" class="input-box" placeholder="Email" required>
-                <input type="password" name="password" class="input-box" placeholder="Password" required>
-                <input type="text" name="no_hp" class="input-box" placeholder="No. Handphone" required>
-                <textarea name="alamat" class="input-box" placeholder="Alamat Lengkap" required></textarea>
-                
-                <button type="submit" name="register" class="btn-signup">SIGN UP</button>
-            </form>
+          <form method="POST" action="">
+    <input type="text" name="nama" class="input-box" placeholder="Nama Lengkap" required>
+    <input type="email" name="email" class="input-box" placeholder="Email" required>
+    <input type="password" name="password" class="input-box" placeholder="Password" required>
+    <input type="password" name="konfirmasi_password" class="input-box" placeholder="Konfirmasi Password" required>
+
+    <!-- Menampilkan pesan error di atas tombol jika ada kesalahan -->
+    <?php if (!empty($error)) : ?>
+        <p style="color: red; font-size: 14px; margin-bottom: 10px; text-align: center;">
+            <?= $error; ?>
+        </p>
+    <?php endif; ?>
+
+    <button type="submit" name="register" class="btn-signup">SIGN UP</button>
+</form>
         </div>
     </div>
 
