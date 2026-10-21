@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . "/../../config/koneksi.php";
 
@@ -20,14 +19,17 @@ if (!$query) {
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Booking - RPBNusa</title>
 
     <link rel="stylesheet"
-        href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+          href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+
+    <!-- CSS DataTables Bootstrap 5 -->
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css">
 </head>
 
 <body class="bg-light">
@@ -60,7 +62,8 @@ if (!$query) {
         <div class="card-body">
 
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
+                <table id="tabelBooking"
+                       class="table table-bordered table-hover align-middle w-100">
 
                     <thead class="table-primary">
                         <tr>
@@ -88,7 +91,10 @@ if (!$query) {
 
                             if ($status === 'Dikonfirmasi') {
                                 $badge = 'bg-success';
-                            } elseif ($status === 'Ditolak' || $status === 'Dibatalkan') {
+                            } elseif (
+                                $status === 'Ditolak' ||
+                                $status === 'Dibatalkan'
+                            ) {
                                 $badge = 'bg-danger';
                             }
                     ?>
@@ -111,10 +117,17 @@ if (!$query) {
                                 <?= htmlspecialchars($b['tanggal_keberangkatan'] ?? '-'); ?>
                             </td>
 
-                            <td><?= (int) $b['jumlah_peserta']; ?></td>
-
                             <td>
-                                Rp <?= number_format((float) $b['total_harga'], 0, ',', '.'); ?>
+                                <?= (int) $b['jumlah_peserta']; ?>
+                            </td>
+
+                            <td data-order="<?= (float) $b['total_harga']; ?>">
+                                Rp <?= number_format(
+                                    (float) $b['total_harga'],
+                                    0,
+                                    ',',
+                                    '.'
+                                ); ?>
                             </td>
 
                             <td>
@@ -148,14 +161,8 @@ if (!$query) {
 
                     <?php
                         endwhile;
-                    else:
+                    endif;
                     ?>
-                        <tr>
-                            <td colspan="9" class="text-center text-muted">
-                                Belum ada data booking.
-                            </td>
-                        </tr>
-                    <?php endif; ?>
                     </tbody>
 
                 </table>
@@ -170,6 +177,45 @@ if (!$query) {
 </div>
 
 <script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- JavaScript DataTables -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#tabelBooking').DataTable({
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
+        order: [],
+        columnDefs: [
+            {
+                targets: [0, 8],
+                orderable: false,
+                searchable: false
+            }
+        ],
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data yang ditampilkan",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            zeroRecords: "Data booking tidak ditemukan",
+            emptyTable: "Belum ada data booking",
+            paginate: {
+                first: "1",
+                last: "..",
+                next: ">>",
+                previous: "<<"
+            }
+        }
+    });
+});
+</script>
 
 </body>
 </html>
