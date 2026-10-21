@@ -128,7 +128,82 @@ if (!$paket) {
                                 class="gambar-paket shadow-sm"
                                 alt="<?= htmlspecialchars($paket['nama_paket']); ?>">
                         </div>
+                        <!-- Fasilitas Include / Exclude -->
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-light rounded-3 border h-100">
+                                    <h6 class="fw-bold text-success mb-2">✔ Fasilitas Termasuk:</h6>
+                                    <ul class="small text-secondary mb-0 ps-3">
+                                        <li>Armada Bus / Elf AC (Penjemputan Malang)</li>
+                                        <li>Driver, BBM, Tol & Parkir</li>
+                                        <li>Tiket Masuk Objek Wisata</li>
+                                        <li>Pemandu Wisata (Tour Guide)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-light rounded-3 border h-100">
+                                    <h6 class="fw-bold text-danger mb-2">✖ Tidak Termasuk:</h6>
+                                    <ul class="small text-secondary mb-0 ps-3">
+                                        <li>Pengeluaran Pribadi</li>
+                                        <li>Tip Driver & Guide (Sukarela)</li>
+                                        <li>Obat-obatan / Kebutuhan Pribadi</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
 
+                       <!-- Itinerary Otomatis Khusus Jarak Jauh (Luar Pulau / Perjalanan Panjang) -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-2">📅 Rencana Perjalanan (Itinerary):</h6>
+                            <div class="p-3 bg-light rounded-3 border small text-secondary">
+                                <?php 
+                                $jumlah_hari = intval($paket['durasi']); 
+                                $nama_paket = strtolower($paket['nama_paket']);
+
+                                // Cek apakah ini paket destinasi jauh / luar pulau
+                                $is_luar_pulau = (strpos($nama_paket, 'raja ampat') !== false || strpos($nama_paket, 'papua') !== false || strpos($nama_paket, 'bali') !== false || strpos($nama_paket, 'lombok') !== false);
+
+                                if ($is_luar_pulau && $jumlah_hari > 2) {
+                                    // Itinerary khusus perjalanan jauh (Luar Pulau / Butuh Transportasi Udara-Darat)
+                                    for ($i = 1; $i <= $jumlah_hari; $i++) {
+                                        if ($i == 1) {
+                                            $kegiatan = "Perjalanan awal dari Malang menuju bandara penberangkatan, proses check-in, penerbangan menuju kota tujuan, disambut Tour Guide lokal, dan menuju penginapan.";
+                                        } elseif ($i == 2 && $jumlah_hari > 4) {
+                                            $kegiatan = "Adaptasi cuaca/lokasi, orientasi singkat, dan perjalanan darat/laut menuju titik transit utama destinasi wisata.";
+                                        } elseif ($i == $jumlah_hari) {
+                                            $kegiatan = "Persiapan checkout penginapan, belanja oleh-oleh khas daerah tujuan, perjalanan menuju bandara untuk penerbangan kembali, dan penjemputan pulang ke Malang. Tour selesai.";
+                                        } else {
+                                            $array_jauh = [
+                                                "Full day tour mengeksplorasi spot-spot destinasi wisata utama dan keindahan alam populer.",
+                                                "Aktivitas island hopping / eksplorasi budaya lokal didampingi pemandu wisata profesional.",
+                                                "Kunjungan ke pusat kerajinan, wisata kuliner khas, dan menikmati pemandangan sunset.",
+                                                "Aktivitas bebas (free program) atau menikmati fasilitas eksklusif di sekitar akomodasi."
+                                            ];
+                                            $kegiatan = $array_jauh[($i - 2) % count($array_jauh)];
+                                        }
+                                        echo '<p class="mb-2"><strong>Hari ' . $i . ':</strong> ' . $kegiatan . '</p>';
+                                    }
+                                } else {
+                                    // Itinerary standar perjalanan dekat / darat (Contoh: Bromo, Malang sekitarnya)
+                                    if ($jumlah_hari == 1) {
+                                        echo '<p class="mb-0"><strong>Hari 1 (One Day Tour):</strong> Penjemputan di Malang, perjalanan darat menuju objek wisata, eksplorasi, dan kembali ke Malang.</p>';
+                                    } else {
+                                        for ($i = 1; $i <= $jumlah_hari; $i++) {
+                                            if ($i == 1) {
+                                                $kegiatan = "Penjemputan rombongan di Malang dengan armada Bus/Elf, perjalanan darat menuju lokasi wisata, dan check-in.";
+                                            } elseif ($i == $jumlah_hari) {
+                                                $kegiatan = "Checkout, belanja oleh-oleh khas, perjalanan darat kembali ke Malang. Tour selesai.";
+                                            } else {
+                                                $kegiatan = "Full day tour menggunakan armada darat mengeksplorasi rangkaian destinasi wisata utama.";
+                                            }
+                                            echo '<p class="mb-2"><strong>Hari ' . $i . ':</strong> ' . $kegiatan . '</p>';
+                                        }
+                                    }
+                                }
+                                ?>
+                            </div>
+                        </div>
                         <hr>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary fw-semibold">Harga Per Orang</span>
@@ -181,6 +256,7 @@ if (!$paket) {
                             <div class="bg-light p-3 rounded-3 border mb-3">
                                 <p class="mb-1 text-muted small">Total Biaya</p>
                                 <h3 id="total" class="text-primary fw-bold mb-0">Rp 0</h3>
+                                
                             </div>
 
                             <button type="submit" class="btn btn-custom text-white py-2 fw-bold w-100 mb-2">
