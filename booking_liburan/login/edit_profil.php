@@ -38,6 +38,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = "Gagal memperbarui profil.";
     }
+    $no_hp = trim($_POST['no_hp']);
+
+// Cek apakah panjang karakter kurang dari 10 atau lebih dari 13
+if (strlen($no_hp) < 10 || strlen($no_hp) > 13) {
+    $_SESSION['error'] = "Nomor HP harus di antara 10 sampai 13 digit!";
+    header("Location: edit_profil.php"); // Sesuaikan dengan halaman tujuan
+    exit();
+}
+
+// Cek apakah isinya benar-benar angka semua
+if (!is_numeric($no_hp)) {
+    $_SESSION['error'] = "Nomor HP hanya boleh berisi angka!";
+    header("Location: edit_profil.php");
+    exit();
+}
 }
 
 // 3. Ambil data user untuk ditampilkan di form
@@ -80,8 +95,18 @@ if (!$userData) {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Nomor HP / WhatsApp</label>
-                    <input type="tel" name="no_hp" class="form-control" value="<?= htmlspecialchars($userData['no_hp'] ?? '') ?>" required>
+                    <label for="no_hp" class="form-label">No. HP / WA</label>
+    <input type="tel" 
+           class="form-control" 
+           id="no_hp" 
+           name="no_hp" 
+           placeholder="Contoh: 08123456789" 
+           minlength="10" 
+           maxlength="13" 
+           pattern="[0-9]+" 
+           title="Masukkan hanya angka, minimal 10 digit dan maksimal 13 digit" 
+           required>
+    <div class="form-text">Minimal 10 digit dan maksimal 13 digit angka.</div>
                 </div>
 
                 <div class="mb-3">

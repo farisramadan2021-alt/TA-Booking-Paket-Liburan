@@ -100,9 +100,33 @@ if (!$user) {
                         <span class="fw-semibold text-secondary"><i class="bi bi-person-badge me-2"></i>Role</span>
                         <span class="badge bg-primary text-capitalize px-3 py-2"><?= htmlspecialchars($user['role'] ?? '-') ?></span>
                     </li>
+                    
+                    <!-- BAGIAN ALAMAT DENGAN "BACA SELENGKAPNYA" -->
                     <li class="list-group-item py-3">
                         <span class="fw-semibold text-secondary d-block mb-1"><i class="bi bi-geo-alt me-2"></i>Alamat</span>
-                        <span class="text-dark d-block ps-4"><?= htmlspecialchars($user['alamat'] ?? '-') ?></span>
+                        <?php
+                            $alamat_lengkap = $user['alamat'] ?? '-';
+                            $maks_karakter = 60; // Atur batas maksimal karakter sebelum dipotong
+
+                            if ($alamat_lengkap !== '-' && strlen($alamat_lengkap) > $maks_karakter) {
+                                $alamat_pendek = substr($alamat_lengkap, 0, $maks_karakter) . "...";
+                            } else {
+                                $alamat_pendek = $alamat_lengkap;
+                            }
+                        ?>
+                        <span class="text-dark d-block ps-4">
+                            <!-- Teks singkat -->
+                            <span id="alamat-singkat"><?= htmlspecialchars($alamat_pendek); ?></span>
+                            <!-- Teks lengkap (hidden default) -->
+                            <span id="alamat-lengkap" style="display: none;"><?= htmlspecialchars($alamat_lengkap); ?></span>
+
+                            <!-- Tombol Trigger -->
+                            <?php if ($alamat_lengkap !== '-' && strlen($alamat_lengkap) > $maks_karakter): ?>
+                                <a href="javascript:void(0);" onclick="toggleAlamat()" id="btn-selengkapnya" class="text-primary text-decoration-none fw-bold ms-1" style="font-size: 0.85rem;">
+                                    Baca Selengkapnya
+                                </a>
+                            <?php endif; ?>
+                        </span>
                     </li>
                 </ul>
 
@@ -120,7 +144,26 @@ if (!$user) {
         </div>
     </div>
 
-    <!-- Bootstrap JS (Diperlukan untuk tombol close Alert) -->
+    <!-- Skrip JavaScript untuk Baca Selengkapnya -->
+    <script>
+    function toggleAlamat() {
+        var singkat = document.getElementById("alamat-singkat");
+        var lengkap = document.getElementById("alamat-lengkap");
+        var btn = document.getElementById("btn-selengkapnya");
+
+        if (lengkap.style.display === "none") {
+            singkat.style.display = "none";
+            lengkap.style.display = "inline";
+            btn.innerHTML = "Sembunyikan";
+        } else {
+            singkat.style.display = "inline";
+            lengkap.style.display = "none";
+            btn.innerHTML = "Baca Selengkapnya";
+        }
+    }
+    </script>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
