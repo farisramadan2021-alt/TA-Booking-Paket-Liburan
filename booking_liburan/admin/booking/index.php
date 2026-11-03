@@ -1,6 +1,20 @@
+
 <?php
+session_start();
+
 require_once __DIR__ . "/../../config/koneksi.php";
 
+// Periksa akses admin
+if (
+    !isset($_SESSION['login']) ||
+    !isset($_SESSION['role']) ||
+    $_SESSION['role'] !== 'admin'
+) {
+    header("Location: ../../login/login.php");
+    exit;
+}
+
+// Ambil data booking
 $query = mysqli_query($conn, "
     SELECT
         b.*,
@@ -15,173 +29,149 @@ $query = mysqli_query($conn, "
 if (!$query) {
     die("Gagal mengambil data booking: " . mysqli_error($conn));
 }
+
+// Pengaturan layout
+$halamanAktif = 'booking';
+$judulHalaman = 'Data Booking';
+$namaAdmin = $_SESSION['nama'] ?? 'Admin';
+
+include __DIR__ . '/../partials/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Booking - RPBNusa</title>
+<div class="mb-4">
+    <h1 class="page-title">Data Booking</h1>
 
-    <link rel="stylesheet"
-          href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
-
-    <!-- CSS DataTables Bootstrap 5 -->
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css">
-</head>
-
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="../dashboard.php">
-            RPBNusa
-        </a>
-
-        <div>
-            <a href="../dashboard.php" class="btn btn-light btn-sm">
-                Dashboard
-            </a>
-            <a href="../../logout.php" class="btn btn-light btn-sm">
-                Logout
-            </a>
-        </div>
-    </div>
-</nav>
-
-<div class="container py-5">
-
-    <h2 class="fw-bold">Data Booking</h2>
-    <p class="text-muted mb-4">
+    <p class="page-description">
         Kelola pemesanan paket liburan pelanggan.
     </p>
+</div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
+<!-- TABEL BOOKING -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-3 p-md-4">
 
-            <div class="table-responsive">
-                <table id="tabelBooking"
-                       class="table table-bordered table-hover align-middle w-100">
+        <div class="table-responsive">
+            <table id="tabelBooking"
+                   class="table table-bordered table-hover align-middle w-100">
 
-                    <thead class="table-primary">
-                        <tr>
-                            <th>No.</th>
-                            <th>Pengguna</th>
-                            <th>Paket Wisata</th>
-                            <th>Tanggal Booking</th>
-                            <th>Tanggal Keberangkatan</th>
-                            <th>Jumlah Peserta</th>
-                            <th>Total Harga</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
+                <thead class="table-primary">
+                    <tr>
+                        <th>No.</th>
+                        <th>Pengguna</th>
+                        <th>Paket Wisata</th>
+                        <th>Tanggal Booking</th>
+                        <th>Tanggal Keberangkatan</th>
+                        <th>Jumlah Peserta</th>
+                        <th>Total Harga</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                    <?php
-                    $no = 1;
+                <tbody>
+                <?php
+                $no = 1;
 
-                    if (mysqli_num_rows($query) > 0):
-                        while ($b = mysqli_fetch_assoc($query)):
-                            $status = $b['status_booking'] ?? 'Menunggu';
+                if (mysqli_num_rows($query) > 0):
+                    while ($b = mysqli_fetch_assoc($query)):
 
-                            $badge = 'bg-warning text-dark';
+                        $status = $b['status_booking'] ?? 'Menunggu';
 
-                            if ($status === 'Dikonfirmasi') {
-                                $badge = 'bg-success';
-                            } elseif (
-                                $status === 'Ditolak' ||
-                                $status === 'Dibatalkan'
-                            ) {
-                                $badge = 'bg-danger';
-                            }
-                    ?>
-                        <tr>
-                            <td><?= $no++; ?></td>
+                        $badge = 'bg-warning text-dark';
 
-                            <td>
-                                <?= htmlspecialchars($b['nama_pengguna'] ?? '-'); ?>
-                            </td>
+                        if ($status === 'Dikonfirmasi') {
+                            $badge = 'bg-success';
+                        } elseif (
+                            $status === 'Ditolak' ||
+                            $status === 'Dibatalkan'
+                        ) {
+                            $badge = 'bg-danger';
+                        }
+                ?>
+                    <tr>
+                        <td><?= $no++; ?></td>
 
-                            <td>
-                                <?= htmlspecialchars($b['nama_paket'] ?? '-'); ?>
-                            </td>
+                        <td>
+                            <?= htmlspecialchars($b['nama_pengguna'] ?? '-'); ?>
+                        </td>
 
-                            <td>
-                                <?= htmlspecialchars($b['tanggal_booking'] ?? '-'); ?>
-                            </td>
+                        <td>
+                            <?= htmlspecialchars($b['nama_paket'] ?? '-'); ?>
+                        </td>
 
-                            <td>
-                                <?= htmlspecialchars($b['tanggal_keberangkatan'] ?? '-'); ?>
-                            </td>
+                        <td class="text-nowrap">
+                            <?= htmlspecialchars($b['tanggal_booking'] ?? '-'); ?>
+                        </td>
 
-                            <td>
-                                <?= (int) $b['jumlah_peserta']; ?>
-                            </td>
+                        <td class="text-nowrap">
+                            <?= htmlspecialchars($b['tanggal_keberangkatan'] ?? '-'); ?>
+                        </td>
 
-                            <td data-order="<?= (float) $b['total_harga']; ?>">
-                                Rp <?= number_format(
-                                    (float) $b['total_harga'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ); ?>
-                            </td>
+                        <td class="text-nowrap">
+                            <?= (int) ($b['jumlah_peserta'] ?? 0); ?> orang
+                        </td>
 
-                            <td>
-                                <span class="badge <?= $badge ?>">
-                                    <?= htmlspecialchars($status); ?>
-                                </span>
-                            </td>
+                        <td class="text-nowrap"
+                            data-order="<?= (float) $b['total_harga']; ?>">
+                            Rp <?= number_format(
+                                (float) $b['total_harga'],
+                                0,
+                                ',',
+                                '.'
+                            ); ?>
+                        </td>
 
-                            <td>
-                                <?php if ($status === 'Menunggu'): ?>
+                        <td>
+                            <span class="badge <?= $badge; ?>">
+                                <?= htmlspecialchars($status); ?>
+                            </span>
+                        </td>
 
-                                    <a href="konfirmasi.php?id=<?= (int) $b['id_booking']; ?>"
-                                       class="btn btn-success btn-sm mb-1"
-                                       onclick="return confirm('Konfirmasi booking ini?')">
-                                        Konfirmasi
-                                    </a>
+                        <td class="text-nowrap">
+                            <?php if ($status === 'Menunggu'): ?>
 
-                                    <a href="tolak.php?id=<?= (int) $b['id_booking']; ?>"
-                                       class="btn btn-danger btn-sm mb-1"
-                                       onclick="return confirm('Tolak booking ini?')">
-                                        Tolak
-                                    </a>
+                                <a href="konfirmasi.php?id=<?= (int) $b['id_booking']; ?>"
+                                   class="btn btn-success btn-sm mb-1"
+                                   onclick="return confirm('Konfirmasi booking ini?')">
+                                    Konfirmasi
+                                </a>
 
-                                <?php else: ?>
+                                <a href="tolak.php?id=<?= (int) $b['id_booking']; ?>"
+                                   class="btn btn-danger btn-sm mb-1"
+                                   onclick="return confirm('Tolak booking ini?')">
+                                    Tolak
+                                </a>
 
-                                    <span class="text-muted">Tidak ada aksi</span>
+                            <?php else: ?>
 
-                                <?php endif; ?>
-                            </td>
-                        </tr>
+                                <span class="text-muted">Tidak ada aksi</span>
 
-                    <?php
-                        endwhile;
-                    endif;
-                    ?>
-                    </tbody>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
 
-                </table>
-            </div>
+                <?php
+                    endwhile;
+                endif;
+                ?>
+                </tbody>
 
-            <a href="../dashboard.php" class="btn btn-secondary">
-                Kembali
-            </a>
-
+            </table>
         </div>
+
     </div>
 </div>
 
-<script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<div class="mt-3">
+    <a href="../dashboard.php" class="btn btn-secondary">
+        Kembali ke Dashboard
+    </a>
+</div>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- JavaScript DataTables -->
+<!-- DataTables -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
@@ -207,15 +197,10 @@ $(document).ready(function () {
             zeroRecords: "Data booking tidak ditemukan",
             emptyTable: "Belum ada data booking",
             paginate: {
-                first: "1",
-                last: "..",
-                next: ">>",
-                previous: "<<"
             }
         }
     });
 });
 </script>
 
-</body>
-</html>
+<?php include __DIR__ . '/../partials/footer.php'; ?>
