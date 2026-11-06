@@ -1,6 +1,19 @@
 <?php
+session_start();
+
 require_once __DIR__ . "/../../config/koneksi.php";
 
+// Periksa akses admin
+if (
+    !isset($_SESSION['login']) ||
+    !isset($_SESSION['role']) ||
+    $_SESSION['role'] !== 'admin'
+) {
+    header("Location: ../../login/login.php");
+    exit;
+}
+
+// Ambil data pengguna
 $query = mysqli_query(
     $conn,
     "SELECT * FROM `user` ORDER BY id_user DESC"
@@ -9,196 +22,118 @@ $query = mysqli_query(
 if (!$query) {
     die("Gagal mengambil data pengguna: " . mysqli_error($conn));
 }
+
+// Pengaturan layout bersama
+$halamanAktif = 'pengguna';
+$judulHalaman = 'Data Pengguna';
+$namaAdmin = $_SESSION['nama'] ?? 'Admin';
+
+include __DIR__ . '/../partials/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<div class="mb-4">
+    <h1 class="page-title">Data Pengguna</h1>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <p class="page-description">
+        Lihat dan cari data pengguna yang terdaftar di RPBNusa.
+    </p>
+</div>
 
-    <title>Data Pengguna - RPBNusa</title>
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-3 p-md-4">
 
-    <!-- Bootstrap 5 -->
-    <link rel="stylesheet"
-        href="../../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+        <div class="table-responsive">
+            <table id="tabelPengguna"
+                   class="table table-bordered table-hover table-striped
+                          align-middle w-100">
 
-    <!-- DataTables Bootstrap 5 -->
-    <link rel="stylesheet"
-        href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css">
+                <thead class="table-primary">
+                    <tr>
+                        <th>No.</th>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>No. HP</th>
+                        <th>Alamat</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
 
-    <style>
-        body {
-            background: #f4f7fb;
-        }
+                <tbody>
+                <?php
+                $no = 1;
 
-        .card {
-            border: none;
-            border-radius: 12px;
-        }
+                while ($user = mysqli_fetch_assoc($query)):
+                ?>
+                    <tr>
+                        <td><?= $no++; ?></td>
 
-        .table thead th {
-            white-space: nowrap;
-            vertical-align: middle;
-        }
+                        <td class="fw-semibold">
+                            <?= htmlspecialchars($user['nama'] ?? '-'); ?>
+                        </td>
 
-        .table tbody td {
-            vertical-align: middle;
-        }
+                        <td>
+                            <?= htmlspecialchars($user['email'] ?? '-'); ?>
+                        </td>
 
-        .alamat-pengguna {
-            min-width: 180px;
-        }
+                        <td class="text-nowrap">
+                            <?= htmlspecialchars($user['no_hp'] ?? '-'); ?>
+                        </td>
 
-        .dataTables_wrapper {
-            padding-top: 5px;
-        }
-    </style>
-</head>
+                        <td>
+                            <?= htmlspecialchars($user['alamat'] ?? '-'); ?>
+                        </td>
 
-<body>
+                        <td>
+                            <?php if (($user['role'] ?? '') === 'admin'): ?>
+                                <span class="badge bg-danger">Admin</span>
+                            <?php else: ?>
+                                <span class="badge bg-primary">Pelanggan</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+                </tbody>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-primary">
-        <div class="container">
-
-            <a class="navbar-brand fw-bold" href="../dashboard.php">
-                RPBNusa
-            </a>
-
-            <div class="d-flex gap-2">
-                <a href="../dashboard.php" class="btn btn-light btn-sm">
-                    Dashboard
-                </a>
-
-                <a href="../../logout.php" class="btn btn-light btn-sm">
-                    Logout
-                </a>
-            </div>
-
-        </div>
-    </nav>
-
-    <!-- Isi -->
-    <div class="container-fluid px-3 px-md-4 py-4">
-
-        <div class="mb-4">
-            <h2 class="fw-bold mb-1">Data Pengguna</h2>
-
-            <p class="text-muted mb-0">
-                Lihat dan cari data pengguna yang terdaftar di RPBNusa.
-            </p>
-        </div>
-
-        <!-- Tabel pengguna -->
-        <div class="card shadow-sm">
-            <div class="card-body p-3 p-md-4">
-
-                <div class="table-responsive">
-                    <table id="tabelPengguna"
-                        class="table table-bordered table-hover table-striped
-                               align-middle w-100">
-
-                        <thead class="table-primary">
-                            <tr>
-                                <th>No.</th>
-                                <th>Nama</th>
-                                <th>Email</th>
-                                <th>No. HP</th>
-                                <th>Alamat</th>
-                                <th>Role</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <?php
-                            $no = 1;
-
-                            while ($user = mysqli_fetch_assoc($query)):
-                            ?>
-                                <tr>
-                                    <td><?= $no++; ?></td>
-
-                                    <td class="fw-semibold">
-                                        <?= htmlspecialchars($user['nama'] ?? '-'); ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($user['email'] ?? '-'); ?>
-                                    </td>
-
-                                    <td class="text-nowrap">
-                                        <?= htmlspecialchars($user['no_hp'] ?? '-'); ?>
-                                    </td>
-
-                                    <td class="alamat-pengguna">
-                                        <?= htmlspecialchars($user['alamat'] ?? '-'); ?>
-                                    </td>
-
-                                    <td>
-                                        <?php if (($user['role'] ?? '') === 'admin'): ?>
-                                            <span class="badge bg-danger">
-                                                Admin
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge bg-primary">
-                                                Pelanggan
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-
-                    </table>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="mt-3">
-            <a href="../dashboard.php" class="btn btn-secondary">
-                Kembali ke Dashboard
-            </a>
+            </table>
         </div>
 
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="../../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<div class="mt-3">
+    <a href="../dashboard.php" class="btn btn-secondary">
+        Kembali ke Dashboard
+    </a>
+</div>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- CSS DataTables -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css">
 
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- jQuery dan DataTables -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            $('#tabelPengguna').DataTable({
-                pageLength: 5,
-                lengthMenu: [5, 10, 25, 50],
-                order: [],
-                language: {
-                    search: "Cari:",
-                    lengthMenu: "Tampilkan _MENU_ data",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Tidak ada data yang ditampilkan",
-                    infoFiltered: "(difilter dari _MAX_ total data)",
-                    zeroRecords: "Data pengguna tidak ditemukan",
-                    emptyTable: "Belum ada data pengguna",
-                    paginate: {
-                        first: "1",
-                        last: "..",
-                        next: ">>",
-                        previous: "<<"
-                    }
-                }
-            });
-        });
-    </script>
+<script>
+$(document).ready(function () {
+    $('#tabelPengguna').DataTable({
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
+        order: [],
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data yang ditampilkan",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            zeroRecords: "Data pengguna tidak ditemukan",
+            emptyTable: "Belum ada data pengguna",
+            paginate: {
+            }
+        }
+    });
+});
+</script>
 
-</body>
-</html>
+<?php include __DIR__ . '/../partials/footer.php'; ?>

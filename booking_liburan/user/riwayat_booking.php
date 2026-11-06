@@ -15,6 +15,7 @@ $id_user = (int) $_SESSION['id_user'];
 $stmt = mysqli_prepare(
     $conn,
     "SELECT
+    "SELECT
         b.id_booking,
         b.tanggal_booking,
         b.tanggal_keberangkatan,
@@ -96,10 +97,12 @@ if (!$query) {
                 RPBNusa
             </a>
 
+
             <div>
                 <span class="text-white me-3">
                     Halo, <?= htmlspecialchars($_SESSION['nama']); ?>
                 </span>
+
 
                 <a href="dashboard.php" class="btn btn-light btn-sm">
                     Dashboard
@@ -124,10 +127,12 @@ if (!$query) {
                 </p>
             </div>
 
+
             <div class="d-flex gap-2">
                 <a href="dashboard.php" class="btn btn-secondary">
                     Kembali Dashboard
                 </a>
+
 
                 <a href="paket_wisata/index.php" class="btn btn-primary">
                     + Booking Paket
@@ -139,9 +144,11 @@ if (!$query) {
         <!-- Tabel Riwayat Booking -->
         <?php if (mysqli_num_rows($query) > 0): ?>
 
+
             <div class="card shadow-sm">
 
                 <div class="card-body">
+
 
                     <div class="table-responsive">
 
@@ -161,13 +168,16 @@ if (!$query) {
                                 </tr>
                             </thead>
 
+
                             <tbody>
+
 
                                 <?php
                                 $no = 1;
 
                                 while ($booking = mysqli_fetch_assoc($query)):
                                 ?>
+
 
                                     <tr>
 
@@ -185,6 +195,7 @@ if (!$query) {
                                         <td>
                                             <div class="d-flex align-items-center">
 
+
                                                 <?php if (!empty($booking['gambar'])): ?>
 
                                                     <img
@@ -194,19 +205,23 @@ if (!$query) {
 
                                                 <?php endif; ?>
 
+
                                                 <div>
 
                                                     <div class="fw-bold">
                                                         <?= htmlspecialchars($booking['nama_paket']); ?>
                                                     </div>
 
+
                                                     <small class="text-muted">
                                                         <?= htmlspecialchars($booking['destinasi']); ?>
                                                     </small>
 
                                                 </div>
+
                                             </div>
                                         </td>
+
 
                                         <td>
                                             <?= date(
@@ -215,9 +230,12 @@ if (!$query) {
                                             ); ?>
                                         </td>
 
+
                                         <td>
                                             <?= (int) $booking['jumlah_peserta']; ?> orang
+                                            <?= (int) $booking['jumlah_peserta']; ?> orang
                                         </td>
+
 
                                         <td class="fw-bold text-primary">
                                             Rp <?= number_format(
@@ -226,33 +244,47 @@ if (!$query) {
                                                 ',',
                                                 '.'
                                             ); ?>
+                                                $booking['total_harga'],
+                                                0,
+                                                ',',
+                                                '.'
+                                            ); ?>
                                         </td>
+
 
                                         <td>
 
                                             <?php if ($booking['status_booking'] === 'Menunggu'): ?>
 
+
                                                 <span class="badge bg-warning text-dark">
                                                     Menunggu
                                                 </span>
 
+
                                             <?php elseif ($booking['status_booking'] === 'Dikonfirmasi'): ?>
+
 
                                                 <span class="badge bg-success">
                                                     Dikonfirmasi
                                                 </span>
 
+
                                             <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
+
 
                                                 <span class="badge bg-danger">
                                                     Ditolak
                                                 </span>
 
+
                                             <?php else: ?>
+
 
                                                 <span class="badge bg-secondary">
                                                     <?= htmlspecialchars($booking['status_booking']); ?>
                                                 </span>
+
 
                                             <?php endif; ?>
 
@@ -274,21 +306,27 @@ if (!$query) {
 
                                             <?php endif; ?>
 
+
                                         </td>
 
                                     </tr>
 
+
                                 <?php endwhile; ?>
 
+
                             </tbody>
+
 
                         </table>
 
                     </div>
 
+
                 </div>
 
             </div>
+
 
         <?php else: ?>
 
@@ -297,23 +335,29 @@ if (!$query) {
 
                 <div class="card-body text-center py-5">
 
+
                     <h4 class="fw-bold text-secondary">
                         Belum Ada Booking
                     </h4>
+
 
                     <p class="text-muted">
                         Kamu belum melakukan pemesanan paket wisata.
                     </p>
 
+
                     <a href="paket_wisata/index.php" class="btn btn-primary">
                         Lihat Paket Wisata
                     </a>
+
 
                 </div>
 
             </div>
 
+
         <?php endif; ?>
+
 
     </div>
 
