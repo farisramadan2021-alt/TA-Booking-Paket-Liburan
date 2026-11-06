@@ -11,10 +11,10 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
 
 $id_user = (int) $_SESSION['id_user'];
 
-// Ambil riwayat booking user yang sedang login
-$query = mysqli_query(
+// Ambil seluruh riwayat booking milik user (pencarian diserahkan ke DataTable agar langsung filter real-time)
+$stmt = mysqli_prepare(
     $conn,
-    "SELECT 
+    "SELECT
         b.id_booking,
         b.tanggal_booking,
         b.tanggal_keberangkatan,
@@ -25,11 +25,20 @@ $query = mysqli_query(
         p.destinasi,
         p.gambar
      FROM booking b
-     JOIN paket_wisata p 
+     JOIN paket_wisata p
         ON b.id_paket = p.id_paket
-     WHERE b.id_user = $id_user
+     WHERE b.id_user = ?
      ORDER BY b.id_booking DESC"
 );
+
+if (!$stmt) {
+    die("Query error: " . mysqli_error($conn));
+}
+
+mysqli_stmt_bind_param($stmt, "i", $id_user);
+mysqli_stmt_execute($stmt);
+
+$query = mysqli_stmt_get_result($stmt);
 
 if (!$query) {
     die("Query error: " . mysqli_error($conn));
@@ -46,6 +55,9 @@ if (!$query) {
     <title>Riwayat Booking</title>
 
     <link rel="stylesheet" href="../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+    
+    <!-- CSS DataTables Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
         body {
@@ -76,48 +88,70 @@ if (!$query) {
 </head>
 
 <body>
+
     <!-- Navbar -->
     <nav class="navbar navbar-dark navbar-custom">
         <div class="container">
             <a class="navbar-brand fw-bold" href="dashboard.php">
                 RPBNusa
             </a>
+
             <div>
                 <span class="text-white me-3">
                     Halo, <?= htmlspecialchars($_SESSION['nama']); ?>
                 </span>
+
                 <a href="dashboard.php" class="btn btn-light btn-sm">
                     Dashboard
                 </a>
             </div>
         </div>
     </nav>
-    <!-- Isi -->
+
+    <!-- Isi Halaman -->
     <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <!-- Judul dan Tombol -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
             <div>
-                <h2 class="fw-bold judul mb-1">Riwayat Booking</h2>
+                <h2 class="fw-bold judul mb-1">
+                    Riwayat Booking
+                </h2>
+
                 <p class="text-muted mb-0">
                     Daftar perjalanan yang pernah kamu pesan.
                 </p>
             </div>
+
             <div class="d-flex gap-2">
                 <a href="dashboard.php" class="btn btn-secondary">
                     Kembali Dashboard
                 </a>
+
                 <a href="paket_wisata/index.php" class="btn btn-primary">
                     + Booking Paket
                 </a>
             </div>
+
         </div>
+
+        <!-- Tabel Riwayat Booking -->
         <?php if (mysqli_num_rows($query) > 0): ?>
+
             <div class="card shadow-sm">
+
                 <div class="card-body">
+
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+
+                        <!-- Tabel dengan ID DataTable -->
+                        <table id="tabelRiwayat" class="table table-hover align-middle w-100">
+
                             <thead class="table-primary">
                                 <tr>
                                     <th>No</th>
+                                    <th>Tanggal Pemesanan</th>
                                     <th>Paket Wisata</th>
                                     <th>Keberangkatan</th>
                                     <th>Peserta</th>
@@ -126,103 +160,190 @@ if (!$query) {
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
+
                             <tbody>
+
                                 <?php
                                 $no = 1;
+
                                 while ($booking = mysqli_fetch_assoc($query)):
                                 ?>
+
                                     <tr>
+
                                         <td>
                                             <?= $no++; ?>
                                         </td>
+
+                                        <td>
+                                            <?= date(
+                                                'd-m-Y',
+                                                strtotime($booking['tanggal_booking'])
+                                            ); ?>
+                                        </td>
+
                                         <td>
                                             <div class="d-flex align-items-center">
+
                                                 <?php if (!empty($booking['gambar'])): ?>
+
                                                     <img
                                                         src="../uploads/paket_wisata/<?= htmlspecialchars($booking['gambar']); ?>"
                                                         class="gambar-paket me-3"
                                                         alt="<?= htmlspecialchars($booking['nama_paket']); ?>">
+
                                                 <?php endif; ?>
+
                                                 <div>
+
                                                     <div class="fw-bold">
                                                         <?= htmlspecialchars($booking['nama_paket']); ?>
                                                     </div>
+
                                                     <small class="text-muted">
                                                         <?= htmlspecialchars($booking['destinasi']); ?>
                                                     </small>
+
                                                 </div>
                                             </div>
                                         </td>
+
                                         <td>
                                             <?= date(
                                                 'd-m-Y',
                                                 strtotime($booking['tanggal_keberangkatan'])
                                             ); ?>
                                         </td>
+
                                         <td>
-                                            <?= $booking['jumlah_peserta']; ?> orang
+                                            <?= (int) $booking['jumlah_peserta']; ?> orang
                                         </td>
+
                                         <td class="fw-bold text-primary">
                                             Rp <?= number_format(
-                                                    $booking['total_harga'],
-                                                    0,
-                                                    ',',
-                                                    '.'
-                                                ); ?>
+                                                $booking['total_harga'],
+                                                0,
+                                                ',',
+                                                '.'
+                                            ); ?>
                                         </td>
+
                                         <td>
+
                                             <?php if ($booking['status_booking'] === 'Menunggu'): ?>
+
                                                 <span class="badge bg-warning text-dark">
                                                     Menunggu
                                                 </span>
+
                                             <?php elseif ($booking['status_booking'] === 'Dikonfirmasi'): ?>
+
                                                 <span class="badge bg-success">
                                                     Dikonfirmasi
                                                 </span>
+
                                             <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
+
                                                 <span class="badge bg-danger">
                                                     Ditolak
                                                 </span>
+
                                             <?php else: ?>
+
                                                 <span class="badge bg-secondary">
                                                     <?= htmlspecialchars($booking['status_booking']); ?>
                                                 </span>
+
                                             <?php endif; ?>
+
                                         </td>
 
                                         <td>
+
                                             <?php if ($booking['status_booking'] === 'Dikonfirmasi'): ?>
-                                                <a href="pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+
+                                                <a
+                                                    href="pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
                                                     class="btn btn-primary btn-sm">
                                                     Bayar Sekarang
                                                 </a>
+
                                             <?php else: ?>
-                                                <span class="text-muted">Belum tersedia</span>
+
+                                                <span class="text-muted">-</span>
+
                                             <?php endif; ?>
+
                                         </td>
+
                                     </tr>
+
                                 <?php endwhile; ?>
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                 </div>
+
             </div>
+
         <?php else: ?>
+
+            <!-- Jika Data Kosong Sama Sekali -->
             <div class="card shadow-sm">
+
                 <div class="card-body text-center py-5">
+
                     <h4 class="fw-bold text-secondary">
                         Belum Ada Booking
                     </h4>
+
                     <p class="text-muted">
                         Kamu belum melakukan pemesanan paket wisata.
                     </p>
+
                     <a href="paket_wisata/index.php" class="btn btn-primary">
                         Lihat Paket Wisata
                     </a>
-                </div>
-            </div>
-        <?php endif; ?>
-    </div>
-</body>
 
+                </div>
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
+
+    <!-- jQuery & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Script Inisialisasi DataTable dengan Batas 6 Baris -->
+    <script>
+        $(document).ready(function() {
+            $('#tabelRiwayat').DataTable({
+                "pageLength": 6, // Membatasi maksimal 6 data per halaman
+                "lengthMenu": [ [6, 10, 25, 50, -1], [6, 10, 25, 50, "Semua"] ], // Pilihan dropdown jumlah baris
+                "language": {
+                    "search": "Cari wisata:",
+                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada data yang tersedia",
+                    "zeroRecords": "Nama paket atau destinasi tidak ditemukan",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
 </html>
