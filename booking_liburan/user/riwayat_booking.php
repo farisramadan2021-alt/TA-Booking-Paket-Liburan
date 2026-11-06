@@ -15,7 +15,6 @@ $id_user = (int) $_SESSION['id_user'];
 $stmt = mysqli_prepare(
     $conn,
     "SELECT
-    "SELECT
         b.id_booking,
         b.tanggal_booking,
         b.tanggal_keberangkatan,
@@ -233,17 +232,11 @@ if (!$query) {
 
                                         <td>
                                             <?= (int) $booking['jumlah_peserta']; ?> orang
-                                            <?= (int) $booking['jumlah_peserta']; ?> orang
                                         </td>
 
 
                                         <td class="fw-bold text-primary">
                                             Rp <?= number_format(
-                                                $booking['total_harga'],
-                                                0,
-                                                ',',
-                                                '.'
-                                            ); ?>
                                                 $booking['total_harga'],
                                                 0,
                                                 ',',
