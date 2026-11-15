@@ -25,6 +25,23 @@ $namaAdmin = $_SESSION['nama'] ?? 'Admin';
 $tanggalMulai = $_GET['tanggal_mulai'] ?? '';
 $tanggalSelesai = $_GET['tanggal_selesai'] ?? '';
 
+// ===============================
+// SHORTCUT PERIODE LAPORAN
+// ===============================
+
+// Bulan ini
+$awalBulanIni = date('Y-m-01');
+$akhirBulanIni = date('Y-m-t');
+
+// Bulan lalu
+$awalBulanLalu = date('Y-m-01', strtotime('first day of last month'));
+$akhirBulanLalu = date('Y-m-t', strtotime('last day of last month'));
+
+// Tahun ini
+$awalTahunIni = date('Y-01-01');
+$akhirTahunIni = date('Y-12-31');
+
+// Validasi format tanggal
 if (
     $tanggalMulai !== '' &&
     !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggalMulai)
@@ -39,6 +56,7 @@ if (
     $tanggalSelesai = '';
 }
 
+// Siapkan filter SQL
 $where = [];
 $params = [];
 $types = '';
@@ -52,8 +70,10 @@ if ($tanggalMulai !== '') {
 if ($tanggalSelesai !== '') {
     $where[] = "DATE(b.tanggal_booking) <= ?";
     $params[] = $tanggalSelesai;
+    $types .= 's';
 }
 
+// Gabungkan kondisi WHERE
 $whereSQL = '';
 
 if (!empty($where)) {
@@ -65,6 +85,7 @@ if (!empty($where)) {
 // ===============================
 // Pendapatan hanya dihitung dari booking Dikonfirmasi.
 // Jumlah booking dan rating mengikuti filter tanggal.
+
 
 $sqlRingkasan = "
     SELECT
@@ -78,7 +99,7 @@ $sqlRingkasan = "
         COALESCE(
             SUM(
                 CASE
-                    WHEN b.status_booking = 'Dikonfirmasi'
+                    WHEN b.status_booking IN ('Dikonfirmasi', 'Selesai')
                     THEN b.total_harga
                     ELSE 0
                 END
@@ -86,19 +107,16 @@ $sqlRingkasan = "
             0
         ) AS total_pendapatan,
 
-        AVG(
-            CASE
-                WHEN b.status_booking = 'Dikonfirmasi'
-                THEN ul.rating
-            END
-        ) AS rata_rating
+        AVG(ul.rating) AS rata_rating
 
     FROM booking b
+
     LEFT JOIN ulasan ul
         ON b.id_booking = ul.id_booking
 
     $whereSQL
 ";
+
 
 $stmtRingkasan = mysqli_prepare($conn, $sqlRingkasan);
 
@@ -164,8 +182,10 @@ mysqli_stmt_close($stmtStatistikStatus);
 
 $jumlahMenunggu = $statistikStatus['Menunggu'] ?? 0;
 $jumlahDikonfirmasi = $statistikStatus['Dikonfirmasi'] ?? 0;
+$jumlahSelesai = $statistikStatus['Selesai'] ?? 0;
 $jumlahDitolak = $statistikStatus['Ditolak'] ?? 0;
 $jumlahDibatalkan = $statistikStatus['Dibatalkan'] ?? 0;
+
 
 // ===============================
 // DETAIL LAPORAN BOOKING
@@ -243,19 +263,49 @@ include __DIR__ . '/../partials/header.php';
             </p>
         </div>
 
-        <button
-            type="button"
+        <a
+            href="cetak.php?tanggal_mulai=<?= urlencode($tanggalMulai); ?>&tanggal_selesai=<?= urlencode($tanggalSelesai); ?>"
             class="btn btn-primary"
-            onclick="window.print()"
-        >
+            target="_blank">
             <i class="bi bi-printer me-1"></i>
             Cetak Laporan
-        </button>
+        </a>
     </div>
 
     <!-- FILTER TANGGAL -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
+
+            <!-- SHORTCUT PERIODE -->
+            <div class="mb-3">
+                <div class="d-flex flex-wrap gap-2">
+
+                    <a
+                        href="index.php?tanggal_mulai=<?= $awalBulanIni; ?>&tanggal_selesai=<?= $akhirBulanIni; ?>"
+                        class="btn btn-outline-primary btn-sm">
+                        Bulan Ini
+                    </a>
+
+                    <a
+                        href="index.php?tanggal_mulai=<?= $awalBulanLalu; ?>&tanggal_selesai=<?= $akhirBulanLalu; ?>"
+                        class="btn btn-outline-primary btn-sm">
+                        Bulan Lalu
+                    </a>
+
+                    <a
+                        href="index.php?tanggal_mulai=<?= $awalTahunIni; ?>&tanggal_selesai=<?= $akhirTahunIni; ?>"
+                        class="btn btn-outline-primary btn-sm">
+                        Tahun Ini
+                    </a>
+
+                    <a
+                        href="index.php"
+                        class="btn btn-outline-secondary btn-sm">
+                        Semua Data
+                    </a>
+
+                </div>
+            </div>
 
             <form method="GET" class="row g-3 align-items-end">
 
@@ -270,7 +320,7 @@ include __DIR__ . '/../partials/header.php';
                         id="tanggal_mulai"
                         class="form-control"
                         value="<?= htmlspecialchars($tanggalMulai); ?>"
-                    >
+                        onchange="this.form.submit()">
                 </div>
 
                 <div class="col-md-4">
@@ -284,7 +334,7 @@ include __DIR__ . '/../partials/header.php';
                         id="tanggal_selesai"
                         class="form-control"
                         value="<?= htmlspecialchars($tanggalSelesai); ?>"
-                    >
+                        onchange="this.form.submit()">
                 </div>
 
                 <div class="col-md-4 d-flex gap-2">
@@ -295,8 +345,7 @@ include __DIR__ . '/../partials/header.php';
 
                     <a
                         href="index.php"
-                        class="btn btn-secondary"
-                    >
+                        class="btn btn-secondary">
                         Reset
                     </a>
                 </div>
@@ -363,7 +412,7 @@ include __DIR__ . '/../partials/header.php';
 
     <div class="row g-3 mb-4">
 
-        <div class="col-md-3">
+        <div class="col-md">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="text-muted mb-2">
@@ -377,7 +426,7 @@ include __DIR__ . '/../partials/header.php';
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="text-muted mb-2">
@@ -391,7 +440,23 @@ include __DIR__ . '/../partials/header.php';
             </div>
         </div>
 
-        <div class="col-md-3">
+
+        <div class="col-md">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted mb-2">
+                        Selesai
+                    </div>
+
+                    <h3 class="fw-bold text-primary mb-0">
+                        <?= number_format($jumlahSelesai); ?>
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="text-muted mb-2">
@@ -405,7 +470,7 @@ include __DIR__ . '/../partials/header.php';
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="text-muted mb-2">
@@ -435,12 +500,10 @@ include __DIR__ . '/../partials/header.php';
             <div class="table-responsive">
                 <table
                     id="tabelLaporan"
-                    class="table table-bordered table-striped align-middle"
-                >
+                    class="table table-bordered table-striped align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>No</th>
-                            <th>ID Booking</th>
                             <th>Nama Pengguna</th>
                             <th>Paket Wisata</th>
                             <th>Tanggal Booking</th>
@@ -460,10 +523,6 @@ include __DIR__ . '/../partials/header.php';
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
-
-                                <td>
-                                    <?= (int) $b['id_booking']; ?>
-                                </td>
 
                                 <td>
                                     <?= htmlspecialchars(
@@ -504,6 +563,8 @@ include __DIR__ . '/../partials/header.php';
                                         $badgeStatus = 'warning';
                                     } elseif ($status === 'Dikonfirmasi') {
                                         $badgeStatus = 'success';
+                                    } elseif ($status === 'Selesai') {
+                                        $badgeStatus = 'primary';
                                     } elseif ($status === 'Ditolak') {
                                         $badgeStatus = 'danger';
                                     } elseif ($status === 'Dibatalkan') {
@@ -548,64 +609,65 @@ include __DIR__ . '/../partials/header.php';
 </div>
 
 <style>
-@media print {
-    .sidebar,
-    .navbar,
-    .btn,
-    form,
-    footer {
-        display: none !important;
-    }
+    @media print {
 
-    body {
-        background: #fff !important;
-    }
+        .sidebar,
+        .navbar,
+        .btn,
+        form,
+        footer {
+            display: none !important;
+        }
 
-    .container-fluid {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+        body {
+            background: #fff !important;
+        }
 
-    .card {
-        box-shadow: none !important;
-        border: 1px solid #ddd !important;
-        break-inside: avoid;
-    }
+        .container-fluid {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
 
-    table {
-        font-size: 10px !important;
-    }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            break-inside: avoid;
+        }
 
-    th,
-    td {
-        padding: 5px !important;
+        table {
+            font-size: 10px !important;
+        }
+
+        th,
+        td {
+            padding: 5px !important;
+        }
     }
-}
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof $ !== 'undefined' && $.fn.DataTable) {
-        $('#tabelLaporan').DataTable({
-            pageLength: 10,
-            order: [],
-            language: {
-                search: 'Cari:',
-                lengthMenu: 'Tampilkan _MENU_ data',
-                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
-                infoEmpty: 'Tidak ada data',
-                zeroRecords: 'Data tidak ditemukan',
-                paginate: {
-                    first: 'Pertama',
-                    last: 'Terakhir',
-                    next: 'Berikutnya',
-                    previous: 'Sebelumnya'
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof $ !== 'undefined' && $.fn.DataTable) {
+            $('#tabelLaporan').DataTable({
+                pageLength: 10,
+                order: [],
+                language: {
+                    search: 'Cari:',
+                    lengthMenu: 'Tampilkan _MENU_ data',
+                    info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                    infoEmpty: 'Tidak ada data',
+                    zeroRecords: 'Data tidak ditemukan',
+                    paginate: {
+                        first: 'Pertama',
+                        last: 'Terakhir',
+                        next: 'Berikutnya',
+                        previous: 'Sebelumnya'
+                    }
                 }
-            }
-        });
-    }
-});
+            });
+        }
+    });
 </script>
 
 <?php

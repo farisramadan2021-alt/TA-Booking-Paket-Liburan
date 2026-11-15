@@ -1,47 +1,82 @@
 <?php
 session_start();
+
 $host = "127.0.0.1";
 $user = "root";
-$password = "";
+$db_password = "";
 $database = "booking_liburan";
 
-$koneksi = mysqli_connect($host, $user, $password, $database);
+$koneksi = mysqli_connect($host, $user, $db_password, $database);
 
 if (!$koneksi) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
-/** @var mysqli $koneksi */
-
 $error = false;
 
 if (isset($_POST['login'])) {
-    $email    = mysqli_real_escape_string($koneksi, $_POST['email']);
-    $password = $_POST['password'];
+    $identitas = trim($_POST['identitas'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    $result = mysqli_query($koneksi, "SELECT * FROM user WHERE email = '$email'");
+    // 1. Periksa login admin melalui tabel admin
+    $stmt = mysqli_prepare(
+        $koneksi,
+        "SELECT * FROM admin WHERE username = ?"
+    );
 
-    if (mysqli_num_rows($result) === 1) {
-        $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_bind_param($stmt, "s", $identitas);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
 
         if (password_verify($password, $row['password'])) {
-            $_SESSION['login']   = true;
-            $_SESSION['id_user'] = $row['id_user'];
-            $_SESSION['nama']    = $row['nama'];
-            $_SESSION['role']    = $row['role'];
 
-            if ($row['role'] === 'admin') {
-                header("Location: ../admin/dashboard.php");
-                exit;
-            }
+            session_regenerate_id(true);
 
-            if ($row['role'] === 'pelanggan') {
-                header("Location: ../user/dashboard.php");
-                exit;
-            }
+            $_SESSION['login'] = true;
+            $_SESSION['id_admin'] = $row['id_admin'];
+            $_SESSION['nama'] = $row['nama'];
+            $_SESSION['role'] = 'admin';
+
+            header("Location: ../admin/dashboard.php");
+            exit;
         }
     }
 
+    mysqli_stmt_close($stmt);
+
+    // 2. Jika bukan admin, periksa pelanggan melalui tabel user
+    $stmt = mysqli_prepare(
+        $koneksi,
+        "SELECT * FROM user WHERE email = ? AND role = 'pelanggan'"
+    );
+
+    mysqli_stmt_bind_param($stmt, "s", $identitas);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+
+        if (password_verify($password, $row['password'])) {
+
+            session_regenerate_id(true);
+
+            $_SESSION['login'] = true;
+            $_SESSION['id_user'] = $row['id_user'];
+            $_SESSION['nama'] = $row['nama'];
+            $_SESSION['role'] = 'pelanggan';
+
+            header("Location: ../user/dashboard.php");
+            exit;
+        }
+    }
+
+    mysqli_stmt_close($stmt);
+
+    // 3. Jika username/email atau password salah
     $error = true;
 }
 ?>
@@ -204,7 +239,8 @@ if (isset($_POST['login'])) {
             <?php endif; ?>
 
             <form method="POST" action="">
-                <input type="email" name="email" class="input-box" placeholder="Email" required>
+                <input type="text" name="identitas" class="input-box"
+                    placeholder="Email atau Username" required>
                 <input type="password" name="password" class="input-box" placeholder="Pass" required>
 
                 <a href="#" class="forgot-pass">Lupa kata sandi anda?</a>
