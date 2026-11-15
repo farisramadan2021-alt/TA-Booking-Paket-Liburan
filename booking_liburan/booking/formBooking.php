@@ -106,7 +106,6 @@ if (!$paket) {
 <body class="bg-light">
     <div class="container mt-5 pb-5">
 
-        <!-- Menggunakan col-lg-8 dan justify-content-center agar posisinya di tengah dan tersusun ke bawah -->
         <div class="row justify-content-center">
             <div class="col-lg-8">
 
@@ -128,6 +127,7 @@ if (!$paket) {
                                 class="gambar-paket shadow-sm"
                                 alt="<?= htmlspecialchars($paket['nama_paket']); ?>">
                         </div>
+
                         <!-- Fasilitas Include / Exclude -->
                         <div class="row mt-4">
                             <div class="col-md-6 mb-3">
@@ -153,7 +153,7 @@ if (!$paket) {
                             </div>
                         </div>
 
-                       <!-- Itinerary Otomatis Khusus Jarak Jauh (Luar Pulau / Perjalanan Panjang) -->
+                        <!-- Itinerary Otomatis -->
                         <div class="mb-3">
                             <h6 class="fw-bold text-dark mb-2">📅 Rencana Perjalanan (Itinerary):</h6>
                             <div class="p-3 bg-light rounded-3 border small text-secondary">
@@ -161,14 +161,12 @@ if (!$paket) {
                                 $jumlah_hari = intval($paket['durasi']); 
                                 $nama_paket = strtolower($paket['nama_paket']);
 
-                                // Cek apakah ini paket destinasi jauh / luar pulau
                                 $is_luar_pulau = (strpos($nama_paket, 'raja ampat') !== false || strpos($nama_paket, 'papua') !== false || strpos($nama_paket, 'bali') !== false || strpos($nama_paket, 'lombok') !== false);
 
                                 if ($is_luar_pulau && $jumlah_hari > 2) {
-                                    // Itinerary khusus perjalanan jauh (Luar Pulau / Butuh Transportasi Udara-Darat)
                                     for ($i = 1; $i <= $jumlah_hari; $i++) {
                                         if ($i == 1) {
-                                            $kegiatan = "Perjalanan awal dari Malang menuju bandara penberangkatan, proses check-in, penerbangan menuju kota tujuan, disambut Tour Guide lokal, dan menuju penginapan.";
+                                            $kegiatan = "Perjalanan awal dari Malang menuju bandara pemberangkatan, proses check-in, penerbangan menuju kota tujuan, disambut Tour Guide lokal, dan menuju penginapan.";
                                         } elseif ($i == 2 && $jumlah_hari > 4) {
                                             $kegiatan = "Adaptasi cuaca/lokasi, orientasi singkat, dan perjalanan darat/laut menuju titik transit utama destinasi wisata.";
                                         } elseif ($i == $jumlah_hari) {
@@ -185,7 +183,6 @@ if (!$paket) {
                                         echo '<p class="mb-2"><strong>Hari ' . $i . ':</strong> ' . $kegiatan . '</p>';
                                     }
                                 } else {
-                                    // Itinerary standar perjalanan dekat / darat (Contoh: Bromo, Malang sekitarnya)
                                     if ($jumlah_hari == 1) {
                                         echo '<p class="mb-0"><strong>Hari 1 (One Day Tour):</strong> Penjemputan di Malang, perjalanan darat menuju objek wisata, eksplorasi, dan kembali ke Malang.</p>';
                                     } else {
@@ -204,6 +201,7 @@ if (!$paket) {
                                 ?>
                             </div>
                         </div>
+
                         <hr>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary fw-semibold">Harga Per Orang</span>
@@ -237,17 +235,20 @@ if (!$paket) {
                                 <label for="tlp" class="form-label fw-semibold text-secondary">Nomor Telepon</label>
                                 <input type="tel" id="tlp" name="tlp" class="form-control" pattern="[0-9]{10,13}" title="Isi nomor telephone dengan benar (10-13 digit angka)" required>
                             </div>
+                            
+                            <!-- Validasi Tanggal Keberangkatan Minimal H+3 -->
                             <div class="mb-3">
                                 <label for="tanggal" class="form-label fw-semibold text-secondary">
-                                    Tanggal Keberangkatan
+                                    Tanggal Keberangkatan <small class="text-danger fw-bold">(Minimal H+3 dari hari ini)</small>
                                 </label>
                                 <input type="date"
                                     id="tanggal"
                                     name="tanggal"
                                     class="form-control"
-                                    min="<?= date('Y-m-d'); ?>"
+                                    min="<?= date('Y-m-d', strtotime('+3 days')); ?>"
                                     required>
                             </div>
+
                             <div class="mb-3">
                                 <label for="jumlah_peserta" class="form-label fw-semibold text-secondary">Jumlah Peserta</label>
                                 <input type="number" id="jumlah_peserta" name="jumlah_peserta" min="1" value="1" class="form-control" required>
@@ -256,7 +257,6 @@ if (!$paket) {
                             <div class="bg-light p-3 rounded-3 border mb-3">
                                 <p class="mb-1 text-muted small">Total Biaya</p>
                                 <h3 id="total" class="text-primary fw-bold mb-0">Rp 0</h3>
-                                
                             </div>
 
                             <button type="submit" class="btn btn-custom text-white py-2 fw-bold w-100 mb-2">
