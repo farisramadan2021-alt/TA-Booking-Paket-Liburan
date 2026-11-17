@@ -18,10 +18,10 @@ if (isset($_POST['login'])) {
     $identitas = trim($_POST['identitas'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // 1. Periksa login admin melalui tabel admin
+    // 1. Periksa login admin melalui tabel user
     $stmt = mysqli_prepare(
         $koneksi,
-        "SELECT * FROM admin WHERE username = ?"
+        "SELECT * FROM user WHERE email = ? AND role = 'admin'"
     );
 
     mysqli_stmt_bind_param($stmt, "s", $identitas);
@@ -36,7 +36,7 @@ if (isset($_POST['login'])) {
             session_regenerate_id(true);
 
             $_SESSION['login'] = true;
-            $_SESSION['id_admin'] = $row['id_admin'];
+            $_SESSION['id_user'] = $row['id_user'];
             $_SESSION['nama'] = $row['nama'];
             $_SESSION['role'] = 'admin';
 
