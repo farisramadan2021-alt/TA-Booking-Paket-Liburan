@@ -4,6 +4,11 @@
 
 <script src="/booking_liburan/bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+</script>
 <script>
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');

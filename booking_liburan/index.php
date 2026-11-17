@@ -1,56 +1,111 @@
 <?php
 require_once __DIR__ . "/config/koneksi.php";
 
-// Ambil paket wisata yang aktif
-$query = mysqli_query(
-    $conn,
-    "SELECT * FROM paket_wisata
-     WHERE status = 'Aktif'
-     ORDER BY id_paket DESC"
-);
+// ==========================================
+// AMBIL PAKET WISATA AKTIF
+// ==========================================
+$query = mysqli_query($conn, "
+    SELECT *
+    FROM paket_wisata
+    WHERE status = 'Aktif'
+    ORDER BY id_paket DESC
+");
+
+if (!$query) {
+    die("Gagal mengambil paket wisata: " . mysqli_error($conn));
+}
+
+$paketList = [];
+
+while ($row = mysqli_fetch_assoc($query)) {
+    $paketList[] = $row;
+}
+
+// ==========================================
+// FUNGSI ESCAPE HTML
+// ==========================================
+function e($value)
+{
+    return htmlspecialchars(
+        (string) ($value ?? ''),
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
+
+// ==========================================
+// GAMBAR HERO
+// ==========================================
+$gambarHero = "uploads/hero-pantai.png";
+
+if (!empty($paketList)) {
+    $gambarPertama = $paketList[0]['gambar'] ?? '';
+
+    if ($gambarPertama !== '') {
+        $lokasiGambar = __DIR__ . "/uploads/hero-pantai.png/" . $gambarPertama;
+
+        if (file_exists($lokasiGambar)) {
+            $gambarHero = "uploads/hero-pantai.png/" . rawurlencode($gambarPertama);
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 
+
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="RPBNusa menyediakan berbagai pilihan paket wisata menarik dengan proses pemesanan yang mudah.">
 
-    <title>RPBNusa</title>
+    <title>RPBNusa - Temukan Liburan Impianmu</title>
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap 5.3.8 -->
     <link rel="stylesheet"
         href="bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .package-card {
+            transition: transform 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark position-absolute top-0 start-0 w-100 z-3">
 
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
+        <div class="container py-2">
 
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top"
-        style="background-color: #0D47A1;">
-
-        <div class="container">
-
-            <!-- Logo / Nama Website -->
-
-            <a class="navbar-brand fw-bold"
-                href="index.php">
-
-                ✈️ RPBNusa
-
+            <a class="navbar-brand fw-bold fs-4 text-white" href="index.php">
+                ADF Travel
             </a>
-
-
-            <!-- Tombol Mobile -->
 
             <button class="navbar-toggler"
                 type="button"
@@ -58,640 +113,372 @@ $query = mysqli_query(
                 data-bs-target="#navbarLanding"
                 aria-controls="navbarLanding"
                 aria-expanded="false"
-                aria-label="Toggle navigation">
+                aria-label="Buka navigasi">
 
                 <span class="navbar-toggler-icon"></span>
-
             </button>
 
+            <div class="collapse navbar-collapse" id="navbarLanding">
 
-            <!-- Menu -->
-
-            <div class="collapse navbar-collapse"
-                id="navbarLanding">
-
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav mx-auto gap-lg-3">
 
                     <li class="nav-item">
-
-                        <a class="nav-link active"
-                            href="#home">
-
+                        <a class="nav-link text-white fw-semibold" href="#home">
                             Home
-
                         </a>
-
                     </li>
 
-
                     <li class="nav-item">
-
-                        <a class="nav-link"
-                            href="#paket_wisata">
-
+                        <a class="nav-link text-white fw-semibold" href="#paket_wisata">
                             Paket Wisata
-
                         </a>
-
                     </li>
-
 
                     <li class="nav-item">
-
-                        <a class="nav-link"
-                            href="#tentang">
-
+                        <a class="nav-link text-white fw-semibold" href="#tentang">
                             Tentang Kami
-
                         </a>
-
                     </li>
-                    
+
                 </ul>
 
-
-                <!-- Tombol Login/Register -->
-
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 mt-3 mt-lg-0">
 
                     <a href="login/login.php"
-                        class="btn btn-light">
-
+                        class="btn btn-outline-light px-4">
                         Login
-
                     </a>
 
-
                     <a href="login/register.php"
-                        class="btn btn-outline-light">
-
+                        class="btn btn-light px-4 fw-semibold">
                         Daftar
-
                     </a>
 
                 </div>
 
             </div>
-
         </div>
-
     </nav>
 
 
 
-    <!-- =====================================================
-         HERO
-    ====================================================== -->
-
-    <section id="home"
-        class="py-5"
-        style="background-color: #E3F2FD;">
-
-        <div class="container">
-
-            <div class="row align-items-center g-5">
+    <!-- ==========================================
+     HERO SECTION
+========================================== -->
 
 
-                <!-- Teks -->
+    <!-- HERO SECTION -->
+    
+<!-- HERO SECTION -->
+<section id="home"
+    class="hero-section position-relative d-flex align-items-center"
+    style="background-image: url('<?= e($gambarHero); ?>');">
 
-                <div class="col-lg-6">
+    <!-- OVERLAY -->
+    <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+    <div class="container position-relative text-white py-5">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-8 col-xl-7 pt-5">
+                <span class="badge bg-white text-dark rounded-pill px-3 py-2 mb-4">
+                    EXPLORE INDONESIA
+                </span>
+                <h1 class="display-2 fw-bold mb-4">
+                    Temukan Keindahan
+                    <br>
+                    Indonesia Bersama
+                    <br>
+                    ADF Travel
+                </h1>
+                <p class="lead mb-4">
+                    Jelajahi berbagai destinasi wisata menarik
+                    dan temukan pengalaman liburan terbaik
+                    bersama ADF Travel.
+                </p>
+                <a href="#paket_wisata"
+                    class="btn btn-light btn-lg px-4 fw-semibold">
+                    Jelajahi Destinasi
+                </a>
 
-                    <span class="badge rounded-pill text-white px-3 py-2 mb-3"
-                        style="background-color: #2196F3;">
+                <!-- FORM PENCARIAN -->
+                <div class="bg-white rounded-4 shadow p-3 mt-5">
 
-                        ✈️ Booking Liburan
+                    <div class="row g-3 align-items-end">
 
-                    </span>
+                        <div class="col-md-8">
 
+                            <label for="pilihanPaket"
+                                class="form-label fw-semibold text-dark">
+                                Pilih Paket Wisata
+                            </label>
 
-                    <h1 class="display-4 fw-bold"
-                        style="color: #0D47A1;">
+                            <select class="form-select"
+                                id="pilihanPaket">
 
-                        Temukan Liburan
-                        <br>
+                                <option value="">
+                                    Semua Destinasi
+                                </option>
 
-                        <span style="color: #2196F3;">
+                                <?php foreach ($paketList as $paket): ?>
 
-                            Impianmu
+                                    <option value="<?= e($paket['id_paket']); ?>">
+                                        <?= e($paket['nama_paket']); ?>
+                                    </option>
 
-                        </span>
+                                <?php endforeach; ?>
 
-                    </h1>
+                            </select>
 
+                        </div>
 
-                    <p class="lead text-secondary mt-3">
+                        <div class="col-md-4">
 
-                        Nikmati pengalaman liburan yang
-                        menyenangkan dengan berbagai pilihan
-                        paket wisata menarik dan terjangkau.
+                            <button type="button"
+                                class="btn btn-primary w-100"
+                                onclick="cariWisata()">
+                                Cari Wisata
+                            </button>
 
-                    </p>
-
-
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-
-                        <a href="#paket_wisata"
-                            class="btn btn-lg text-white px-4"
-                            style="background-color: #2196F3;">
-
-                            Jelajahi Wisata
-
-                        </a>
-
-
-                        <a href="login/login.php"
-                            class="btn btn-lg btn-outline-primary px-4">
-
-                            Login
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Gambar Hero -->
-
-                <div class="col-lg-6">
-
-                    <div class="ratio ratio-4x3 rounded-4 overflow-hidden shadow">
-
-                        <?php
-                        $gambar_hero = "uploads/paket_wisata/bali.jpg";
-                        ?>
-
-                        <?php if (file_exists($gambar_hero)): ?>
-
-                            <img
-                                src="<?= $gambar_hero; ?>"
-                                class="img-fluid object-fit-cover"
-                                alt="Destinasi wisata">
-
-                        <?php else: ?>
-
-                            <div class="d-flex align-items-center justify-content-center text-white"
-                                style="background-color: #90CAF9;">
-
-                                <div class="text-center">
-
-                                    <div class="display-1">
-                                        🌴
-                                    </div>
-
-                                    <h4 style="color: #0D47A1;">
-                                        RPBNusa
-                                    </h4>
-
-                                </div>
-
-                            </div>
-
-                        <?php endif; ?>
+                        </div>
 
                     </div>
-
                 </div>
 
             </div>
-
         </div>
+    </div>
+</section>
+    <!-- AKHIR HERO -->
 
-    </section>
 
+    <!-- ==========================================
+     PAKET WISATA
+========================================== -->
 
-
-    <!-- =====================================================
-         INFORMASI
-    ====================================================== -->
-
-    <section class="py-4"
-        style="background-color: #90CAF9;">
+    <section id="paket_wisata" class="py-5 bg-light">
 
         <div class="container">
-
-            <div class="row g-3 text-center">
-
-
-                <!-- Item 1 -->
-
-                <div class="col-md-4">
-
-                    <div class="bg-white rounded-3 shadow-sm p-4 h-100">
-
-                        <div class="fs-1 mb-2">
-                            🌴
-                        </div>
-
-                        <h5 class="fw-bold"
-                            style="color: #0D47A1;">
-
-                            Destinasi Menarik
-
-                        </h5>
-
-                        <p class="text-secondary mb-0">
-
-                            Berbagai pilihan destinasi
-                            wisata untuk liburanmu.
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Item 2 -->
-
-                <div class="col-md-4">
-
-                    <div class="bg-white rounded-3 shadow-sm p-4 h-100">
-
-                        <div class="fs-1 mb-2">
-                            💰
-                        </div>
-
-                        <h5 class="fw-bold"
-                            style="color: #0D47A1;">
-
-                            Harga Terjangkau
-
-                        </h5>
-
-                        <p class="text-secondary mb-0">
-
-                            Pilihan paket wisata dengan
-                            harga yang sesuai kebutuhan.
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Item 3 -->
-
-                <div class="col-md-4">
-
-                    <div class="bg-white rounded-3 shadow-sm p-4 h-100">
-
-                        <div class="fs-1 mb-2">
-                            📅
-                        </div>
-
-                        <h5 class="fw-bold"
-                            style="color: #0D47A1;">
-
-                            Booking Mudah
-
-                        </h5>
-
-                        <p class="text-secondary mb-0">
-
-                            Pesan paket wisata dengan
-                            proses yang mudah dan praktis.
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         PAKET WISATA
-    ====================================================== -->
-
-    <section id="paket_wisata"
-        class="py-5">
-
-        <div class="container">
-
-
-            <!-- Judul -->
 
             <div class="text-center mb-5">
 
-                <span class="badge rounded-pill text-white px-3 py-2 mb-2"
-                    style="background-color: #2196F3;">
-
-                    PAKET WISATA
-
+                <span class="badge bg-success-subtle text-success px-3 py-2 mb-3">
+                    DESTINASI WISATA
                 </span>
 
-
-                <h2 class="fw-bold"
-                    style="color: #0D47A1;">
-
-                    Jelajahi Destinasi Pilihan
-
+                <h2 class="fw-bold display-6 text-dark">
+                    Popular Destinations
                 </h2>
 
-
-                <p class="text-secondary">
-
-                    Temukan paket wisata yang cocok
-                    untuk perjalananmu.
-
+                <p class="text-secondary mt-3">
+                    Temukan berbagai destinasi wisata menarik
+                    untuk pengalaman liburan terbaikmu.
                 </p>
 
             </div>
 
 
-
-            <!-- Card Paket -->
-
             <div class="row g-4">
 
-                <?php if (mysqli_num_rows($query) > 0): ?>
+                <?php if (!empty($paketList)): ?>
 
-                    <?php while ($paket = mysqli_fetch_assoc($query)): ?>
+                    <?php foreach ($paketList as $paket): ?>
 
+                        <?php
+                        $namaGambar = $paket['gambar'] ?? '';
+                        $pathGambar = __DIR__ . "/uploads/paket_wisata/" . $namaGambar;
 
-                        <div class="col-md-6 col-lg-4">
+                        $gambarTersedia = (
+                            $namaGambar !== '' &&
+                            file_exists($pathGambar)
+                        );
+                        ?>
 
-                            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="col-md-6 col-lg-4 paket-item"
+                            data-id-paket="<?= e($paket['id_paket']); ?>">
 
+                            <div class="card h-100 shadow-sm package-card">
 
-                                <!-- Foto -->
+                                <?php if ($gambarTersedia): ?>
 
-                                <div class="ratio ratio-16x9">
-
-                                    <?php if (!empty($paket['gambar'])): ?>
-
+                                    <div class="ratio ratio-16x9">
                                         <img
-                                            src="uploads/paket_wisata/<?= htmlspecialchars($paket['gambar']); ?>"
-                                            class="card-img-top object-fit-cover"
-                                            alt="<?= htmlspecialchars($paket['nama_paket']); ?>">
-
-                                    <?php else: ?>
-
-                                        <div class="d-flex align-items-center justify-content-center text-white"
-                                            style="background-color: #90CAF9;">
-
-                                            <span class="fs-1">
-                                                🌴
-                                            </span>
-
-                                        </div>
-
-                                    <?php endif; ?>
-
-                                </div>
-
-
-
-                                <!-- Isi Card -->
-
-                                <div class="card-body d-flex flex-column">
-
-
-                                    <h5 class="card-title fw-bold"
-                                        style="color: #0D47A1;">
-
-                                        <?= htmlspecialchars($paket['nama_paket']); ?>
-
-                                    </h5>
-
-
-                                    <p class="text-secondary mb-2">
-
-                                        📍
-                                        <?= htmlspecialchars($paket['destinasi']); ?>
-
-                                    </p>
-
-
-                                    <p class="mb-2">
-
-                                        🕐
-                                        <?= htmlspecialchars($paket['durasi']); ?>
-                                        Hari
-
-                                    </p>
-
-
-                                    <h5 class="fw-bold"
-                                        style="color: #2196F3;">
-
-                                        Rp
-                                        <?= number_format(
-                                            $paket['harga'],
-                                            0,
-                                            ',',
-                                            '.'
-                                        ); ?>
-
-                                    </h5>
-
-
-                                    <p class="text-secondary">
-
-                                        <?= htmlspecialchars($paket['deskripsi']); ?>
-
-                                    </p>
-
-
-                                    <!-- Tombol -->
-
-                                    <div class="mt-auto pt-3">
-
-                                        <a
-                                            href="login/login.php"
-                                            class="btn text-white w-100"
-                                            style="background-color: #2196F3;">
-
-                                            Booking Sekarang
-
-                                        </a>
-
+                                            src="uploads/paket_wisata/<?= rawurlencode($namaGambar); ?>"
+                                            class="w-100 h-100 object-fit-cover"
+                                            alt="<?= e($paket['nama_paket']); ?>"
+                                            loading="lazy">
                                     </div>
 
-                                </div>
+                                <?php else: ?>
 
+                                    <div class="ratio ratio-16x9 bg-light d-flex align-items-center justify-content-center">
+                                        <span class="fs-1">🌴</span>
+                                    </div>
+
+                                <?php endif; ?>
+
+                                <div class="card-body d-flex flex-column p-3">
+
+                                    <h5 class="card-title fw-bold text-dark">
+                                        <?= e($paket['nama_paket']); ?>
+                                    </h5>
+
+                                    <p class="small text-secondary mb-2">
+                                        📍 <?= e($paket['destinasi']); ?>
+                                    </p>
+
+                                    <p class="small text-secondary mb-2">
+                                        🕐 <?= (int) $paket['durasi']; ?> Hari
+                                    </p>
+
+                                    <p class="card-text text-secondary small">
+                                        <?= e($paket['deskripsi']); ?>
+                                    </p>
+
+                                    <h5 class="fw-bold text-success mt-auto mb-3">
+                                        Rp <?= number_format(
+                                                (float) $paket['harga'],
+                                                0,
+                                                ',',
+                                                '.'
+                                            ); ?>
+                                    </h5>
+
+                                    <a href="login/login.php"
+                                        class="btn btn-primary w-100">
+                                        Booking Sekarang
+                                    </a>
+
+                                </div>
                             </div>
 
                         </div>
 
-
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
 
                 <?php else: ?>
 
-
-                    <!-- Tidak ada paket -->
-
                     <div class="col-12">
-
-                        <div class="alert text-center"
-                            style="background-color: #E3F2FD; color: #0D47A1;">
-
-                            <h5 class="fw-bold">
-
-                                Belum Ada Paket Wisata
-
-                            </h5>
-
-                            <p class="mb-0">
-
-                                Saat ini belum tersedia paket wisata
-                                yang dapat ditampilkan.
-
-                            </p>
-
+                        <div class="alert alert-info text-center">
+                            Belum ada paket wisata yang tersedia.
                         </div>
-
                     </div>
-
 
                 <?php endif; ?>
 
             </div>
 
-        </div>
 
     </section>
 
 
+    <!-- ==========================================
+     TENTANG KAMI
+========================================== -->
 
-    <!-- =====================================================
-         TENTANG KAMI
-    ====================================================== -->
-
-    <section id="tentang"
-        class="py-5"
-        style="background-color: #E3F2FD;">
+    <section id="tentang" class="about-section section-padding">
 
         <div class="container">
 
             <div class="row align-items-center g-4">
 
-
                 <div class="col-lg-6">
 
-                    <h2 class="fw-bold"
-                        style="color: #0D47A1;">
+                    <span class="section-badge">
+                        TENTANG KAMI
+                    </span>
 
-                        Tentang RPBNusa
-
+                    <h2 class="section-title">
+                        Mengenal Lebih Dekat RPBNusa
                     </h2>
 
-                    <p class="text-secondary mt-3">
+                    <p class="text-secondary mt-4"
+                        style="line-height: 1.9;">
 
-                        RPBNusa merupakan platform
-                        yang membantu pengguna menemukan dan
-                        melakukan pemesanan paket wisata dengan
-                        mudah.
+                        RPBNusa merupakan platform berbasis website
+                        yang membantu pengguna menemukan dan melakukan
+                        pemesanan paket wisata dengan mudah.
+
+                    </p>
+
+                    <p class="text-secondary"
+                        style="line-height: 1.9;">
+
+                        Kami menyediakan berbagai pilihan destinasi
+                        wisata dengan informasi mengenai durasi,
+                        harga, dan deskripsi paket wisata.
 
                     </p>
 
-                    <p class="text-secondary">
+                    <a href="#paket_wisata"
+                        class="btn btn-primary-custom mt-3">
 
-                        Kami menyediakan berbagai pilihan
-                        destinasi wisata dengan informasi
-                        mengenai durasi, harga, dan deskripsi
-                        paket.
+                        Lihat Paket Wisata
 
-                    </p>
+                    </a>
 
                 </div>
 
-
                 <div class="col-lg-6">
 
-                    <div class="bg-white rounded-4 shadow-sm p-4">
+                    <div class="about-card">
 
                         <h5 class="fw-bold"
-                            style="color: #0D47A1;">
+                            style="color: var(--primary);">
 
-                            Kenapa memilih kami?
+                            Mengapa Memilih RPBNusa?
 
                         </h5>
 
+                        <div class="about-item">
 
-                        <div class="d-flex gap-3 mt-4">
-
-                            <div class="fs-4">
-                                ✓
-                            </div>
+                            <div class="about-check">✓</div>
 
                             <div>
 
-                                <h6 class="fw-bold mb-1">
-
+                                <h6 class="fw-bold">
                                     Informasi Lengkap
-
                                 </h6>
 
-                                <p class="text-secondary mb-0">
-
+                                <p class="text-secondary small mb-0">
                                     Lihat informasi paket wisata
-                                    sebelum melakukan booking.
-
+                                    sebelum melakukan pemesanan.
                                 </p>
 
                             </div>
 
                         </div>
 
+                        <div class="about-item">
 
-                        <div class="d-flex gap-3 mt-4">
-
-                            <div class="fs-4">
-                                ✓
-                            </div>
+                            <div class="about-check">✓</div>
 
                             <div>
 
-                                <h6 class="fw-bold mb-1">
-
-                                    Proses Mudah
-
+                                <h6 class="fw-bold">
+                                    Proses Pemesanan Mudah
                                 </h6>
 
-                                <p class="text-secondary mb-0">
-
-                                    Booking paket wisata dengan
-                                    proses yang sederhana.
-
+                                <p class="text-secondary small mb-0">
+                                    Lakukan booking paket wisata
+                                    melalui sistem website.
                                 </p>
 
                             </div>
 
                         </div>
 
+                        <div class="about-item">
 
-                        <div class="d-flex gap-3 mt-4">
-
-                            <div class="fs-4">
-                                ✓
-                            </div>
+                            <div class="about-check">✓</div>
 
                             <div>
 
-                                <h6 class="fw-bold mb-1">
-
-                                    Pilihan Beragam
-
+                                <h6 class="fw-bold">
+                                    Pilihan Destinasi
                                 </h6>
 
-                                <p class="text-secondary mb-0">
-
-                                    Tersedia berbagai destinasi
-                                    wisata untuk dipilih.
-
+                                <p class="text-secondary small mb-0">
+                                    Temukan berbagai pilihan
+                                    destinasi wisata menarik.
                                 </p>
 
                             </div>
@@ -709,43 +496,38 @@ $query = mysqli_query(
     </section>
 
 
+    <!-- ==========================================
+     CALL TO ACTION
+========================================== -->
 
-    <!-- =====================================================
-         CALL TO ACTION
-    ====================================================== -->
-
-    <section class="py-5"
-        style="background-color: #0D47A1;">
+    <section class="cta-section">
 
         <div class="container text-center">
 
-            <h2 class="fw-bold text-white">
+            <h2 class="fw-bold text-white mb-3">
 
                 Siap Merencanakan Liburanmu?
 
             </h2>
 
+            <p class="text-white-50 mb-4">
 
-            <p class="text-white-50">
-
-                Daftar sekarang dan mulai pilih
-                paket wisata favoritmu.
+                Daftar sekarang dan temukan paket wisata
+                favoritmu bersama RPBNusa.
 
             </p>
 
-
-            <div class="d-flex justify-content-center gap-2">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
 
                 <a href="login/register.php"
-                    class="btn btn-light px-4">
+                    class="btn btn-cta">
 
                     Daftar Sekarang
 
                 </a>
 
-
                 <a href="login/login.php"
-                    class="btn btn-outline-light px-4">
+                    class="btn btn-outline-light px-4 py-2 fw-semibold">
 
                     Login
 
@@ -758,42 +540,34 @@ $query = mysqli_query(
     </section>
 
 
+    <!-- ==========================================
+     FOOTER
+========================================== -->
 
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
-
-    <footer class="bg-white py-4">
+    <footer>
 
         <div class="container">
 
             <div class="row align-items-center">
 
-
                 <div class="col-md-6 text-center text-md-start">
 
-                    <h5 class="fw-bold"
-                        style="color: #0D47A1;">
-
+                    <div class="footer-brand">
                         ✈️ RPBNusa
+                    </div>
 
-                    </h5>
-
-                    <p class="text-secondary mb-0">
-
+                    <p class="text-secondary small mb-0">
                         Temukan liburan impianmu.
-
                     </p>
 
                 </div>
 
-
                 <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
 
-                    <p class="text-secondary mb-0">
+                    <p class="text-secondary small mb-0">
 
                         &copy; <?= date('Y'); ?>
-                        RPBNusa
+                        RPBNusa. All Rights Reserved.
 
                     </p>
 
@@ -806,11 +580,45 @@ $query = mysqli_query(
     </footer>
 
 
+    <!-- ==========================================
+     BOOTSTRAP JAVASCRIPT
+========================================== -->
 
-    <!-- Bootstrap JS -->
 
+    <script>
+        function cariWisata() {
+
+            const pilihanPaket = document.getElementById("pilihanPaket").value;
+            const semuaPaket = document.querySelectorAll(".paket-item");
+
+            let jumlahHasil = 0;
+
+            semuaPaket.forEach(function(kartu) {
+
+                const idPaket = kartu.dataset.idPaket;
+
+                if (pilihanPaket === "" || idPaket === pilihanPaket) {
+                    kartu.classList.remove("d-none");
+                    jumlahHasil++;
+                } else {
+                    kartu.classList.add("d-none");
+                }
+
+            });
+
+            document.getElementById("paket_wisata").scrollIntoView({
+                behavior: "smooth"
+            });
+
+            if (jumlahHasil === 0) {
+                alert("Paket wisata tidak ditemukan.");
+            }
+
+        }
+    </script>
+
+    <!-- BOOTSTRAP JAVASCRIPT -->
     <script src="bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

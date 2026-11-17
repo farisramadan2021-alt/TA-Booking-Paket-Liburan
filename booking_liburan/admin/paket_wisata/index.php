@@ -99,80 +99,93 @@ include __DIR__ . '/../partials/header.php';
                 </thead>
 
                 <tbody>
-                <?php
-                $no = 1;
+                    <?php
+                    $no = 1;
 
-                while ($data = mysqli_fetch_assoc($query)):
-                ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
+                    while ($data = mysqli_fetch_assoc($query)):
+                    ?>
+                        <tr>
+                            <td><?= $no++; ?></td>
 
-                        <td>
-                            <?php if (!empty($data['gambar'])): ?>
-                                <img
-                                    src="../../uploads/paket_wisata/<?= htmlspecialchars($data['gambar']); ?>"
-                                    alt="<?= htmlspecialchars($data['nama_paket']); ?>"
-                                    class="gambar-paket">
-                            <?php else: ?>
-                                <span class="text-muted">
-                                    Tidak ada gambar
-                                </span>
-                            <?php endif; ?>
-                        </td>
+                            <td>
+                                <?php if (!empty($data['gambar'])): ?>
+                                    <img
+                                        src="../../uploads/paket_wisata/<?= htmlspecialchars($data['gambar']); ?>"
+                                        alt="<?= htmlspecialchars($data['nama_paket']); ?>"
+                                        class="gambar-paket">
+                                <?php else: ?>
+                                    <span class="text-muted">
+                                        Tidak ada gambar
+                                    </span>
+                                <?php endif; ?>
+                            </td>
 
-                        <td class="fw-semibold">
-                            <?= htmlspecialchars($data['nama_paket']); ?>
-                        </td>
+                            <td class="fw-semibold">
+                                <?= htmlspecialchars($data['nama_paket']); ?>
+                            </td>
 
-                        <td>
-                            <?= htmlspecialchars($data['destinasi']); ?>
-                        </td>
+                            <td>
+                                <?= htmlspecialchars($data['destinasi']); ?>
+                            </td>
 
-                        <td class="text-nowrap">
-                            <?= (int) $data['durasi']; ?> Hari
-                        </td>
+                            <td class="text-nowrap">
+                                <?= (int) $data['durasi']; ?> Hari
+                            </td>
 
-                        <td class="text-nowrap">
-                            Rp <?= number_format(
-                                (float) $data['harga'],
-                                0,
-                                ',',
-                                '.'
-                            ); ?>
-                        </td>
+                            <td class="text-nowrap">
+                                Rp <?= number_format(
+                                        (float) $data['harga'],
+                                        0,
+                                        ',',
+                                        '.'
+                                    ); ?>
+                            </td>
 
-                        <td class="deskripsi-paket">
-                            <?= htmlspecialchars($data['deskripsi']); ?>
-                        </td>
+                            <td class="deskripsi-paket">
+                                <?= htmlspecialchars($data['deskripsi']); ?>
+                            </td>
 
-                        <td>
-                            <?php if ($data['status'] === 'Aktif'): ?>
-                                <span class="badge text-bg-success">
-                                    Aktif
-                                </span>
-                            <?php else: ?>
-                                <span class="badge text-bg-secondary">
-                                    <?= htmlspecialchars($data['status']); ?>
-                                </span>
-                            <?php endif; ?>
-                        </td>
+                            <td>
+                                <?php if ($data['status'] === 'Aktif'): ?>
+                                    <span class="badge text-bg-success">
+                                        Aktif
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge text-bg-secondary">
+                                        <?= htmlspecialchars($data['status']); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
 
-                        <td class="text-nowrap">
-                            <a
-                                href="edit.php?id=<?= (int) $data['id_paket']; ?>"
-                                class="btn btn-warning btn-sm mb-1">
-                                Edit
-                            </a>
+                            <td class="text-nowrap">
 
-                            <a
-                                href="hapus.php?id=<?= (int) $data['id_paket']; ?>"
-                                class="btn btn-danger btn-sm mb-1"
-                                onclick="return confirm('Yakin ingin menghapus paket wisata ini?');">
-                                Hapus
-                            </a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
+                                <a
+                                    href="detail.php?id=<?= (int) $data['id_paket']; ?>"
+                                    class="btn btn-info btn-sm mb-1 text-white">
+                                    <i class="bi bi-eye"></i>
+                                    Detail
+                                </a>
+
+                                <a
+                                    href="edit.php?id=<?= (int) $data['id_paket']; ?>"
+                                    class="btn btn-warning btn-sm mb-1">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="hapus.php?id=<?= (int) $data['id_paket']; ?>"
+                                    class="btn btn-danger btn-sm mb-1"
+                                    onclick="return konfirmasiHapus(event, this);">
+
+                                    <i class="bi bi-trash"></i>
+                                    Hapus
+
+                                </a>
+
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
                 </tbody>
 
             </table>
@@ -187,30 +200,59 @@ include __DIR__ . '/../partials/header.php';
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-$(document).ready(function () {
-    $('#tabelPaket').DataTable({
-        pageLength: 5,
-        lengthMenu: [5, 10, 25, 50],
-        order: [],
-        columnDefs: [
-            {
+    $(document).ready(function() {
+        $('#tabelPaket').DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            order: [],
+            columnDefs: [{
                 targets: [1, 8],
                 orderable: false
+            }],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data yang ditampilkan",
+                infoFiltered: "(difilter dari _MAX_ total data)",
+                zeroRecords: "Data yang dicari tidak ditemukan",
+                emptyTable: "Belum ada data paket wisata",
+                paginate: {}
             }
-        ],
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data yang ditampilkan",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data yang dicari tidak ditemukan",
-            emptyTable: "Belum ada data paket wisata",
-            paginate: {
-            }
-        }
+        });
     });
-});
 </script>
 
+<script>
+function konfirmasiHapus(event, tombol) {
+
+    event.preventDefault();
+
+    const urlHapus = tombol.getAttribute('href');
+
+    Swal.fire({
+        title: 'Hapus Paket Wisata?',
+        text: 'Apakah kamu yakin ingin menghapus paket wisata ini?',
+        icon: 'warning',
+
+        showCancelButton: true,
+
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+
+        reverseButtons: true
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            window.location.href = urlHapus;
+        }
+
+    });
+
+    return false;
+}
+</script>
 <?php include __DIR__ . '/../partials/footer.php'; ?>
