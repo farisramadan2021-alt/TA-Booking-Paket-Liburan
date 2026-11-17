@@ -19,7 +19,14 @@ $id_user = intval($_SESSION['id_user']);
 
 // Keamanan ekstra: Pastikan data booking ini benar-benar milik user yang sedang login
 // dan statusnya hanya boleh dihapus jika sudah 'Ditolak' atau 'Selesai' (opsional sesuai aturan bisnis)
-$stmt_check = mysqli_prepare($conn, "SELECT id_booking, status_booking FROM booking WHERE id_booking = ? AND id_user = ?");
+$stmt_check = mysqli_prepare(
+    $conn,
+    "SELECT id_booking, status_booking
+     FROM booking
+     WHERE id_booking = ?
+     AND id_user = ?
+     AND status_booking IN ('Ditolak', 'Selesai')"
+);
 mysqli_stmt_bind_param($stmt_check, "ii", $id_booking, $id_user);
 mysqli_stmt_execute($stmt_check);
 $result_check = mysqli_stmt_get_result($stmt_check);
@@ -34,8 +41,15 @@ if (!$booking) {
 }
 
 // Eksekusi penghapusan data dari database
-$stmt_delete = mysqli_prepare($conn, "DELETE FROM booking WHERE id_booking = ?");
-mysqli_stmt_bind_param($stmt_delete, "i", $id_booking);
+$stmt_delete = mysqli_prepare(
+    $conn,
+    "DELETE FROM booking
+     WHERE id_booking = ?
+     AND id_user = ?
+     AND status_booking IN ('Ditolak', 'Selesai')"
+);
+
+mysqli_stmt_bind_param($stmt_delete, "ii", $id_booking, $id_user);
 
 if (mysqli_stmt_execute($stmt_delete)) {
     echo "<script>
