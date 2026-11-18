@@ -12,7 +12,6 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
 
 $id_user = (int) $_SESSION['id_user'];
 
-<<<<<<< HEAD
 // ==========================================
 // FILTER STATUS BOOKING
 // ==========================================
@@ -29,7 +28,6 @@ if (!in_array($filter_status, $status_valid, true)) {
 // ==========================================
 // AMBIL RIWAYAT BOOKING DAN PEMBAYARAN
 // ==========================================
-=======
 // Daftar status yang valid beserta tampilan badge-nya
 $daftar_status = [
     'Menunggu'            => ['badge' => 'bg-warning text-dark', 'btn' => 'warning text-dark'],
@@ -45,10 +43,8 @@ $filter_status = isset($_GET['status']) ? $_GET['status'] : '';
 if ($filter_status !== '' && !array_key_exists($filter_status, $daftar_status)) {
     $filter_status = '';
 }
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
 
 $sql = "SELECT
-<<<<<<< HEAD
             b.id_booking,
             b.tanggal_booking,
             b.tanggal_keberangkatan,
@@ -59,7 +55,6 @@ $sql = "SELECT
             p.destinasi,
             p.gambar,
             pb.status_pembayaran
-=======
         b.id_booking,
         b.tanggal_booking,
         b.tanggal_keberangkatan,
@@ -74,7 +69,6 @@ $sql = "SELECT
      JOIN paket_wisata p
         ON b.id_paket = p.id_paket
      WHERE b.id_user = ?";
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
 
         FROM booking b
 
@@ -133,10 +127,7 @@ if (!$query) {
 
     <link rel="stylesheet" href="../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 
-<<<<<<< HEAD
-=======
     <!-- CSS DataTables Bootstrap 5 -->
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
@@ -240,7 +231,6 @@ if (!$query) {
         <div class="card shadow-sm mb-4">
 
             <div class="card-body py-3 d-flex align-items-center flex-wrap gap-2">
-<<<<<<< HEAD
 
                 <span class="fw-semibold text-secondary me-2">
                     Filter Status:
@@ -268,7 +258,6 @@ if (!$query) {
                         Ditolak
                     </a>
 
-=======
                 <span class="fw-semibold text-secondary me-2">Filter Status:</span>
                 <div class="btn-group flex-wrap" role="group">
                     <a href="riwayat_booking.php"
@@ -279,7 +268,6 @@ if (!$query) {
                             <?= htmlspecialchars($nama_status); ?>
                         </a>
                     <?php endforeach; ?>
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
                 </div>
             </div>
         </div>
@@ -376,35 +364,6 @@ if (!$query) {
                                             ); ?>
                                         </td>
 
-<<<<<<< HEAD
-                                        <!-- STATUS BOOKING -->
-                                        <td>
-
-                                            <?php if ($booking['status_booking'] === 'Menunggu'): ?>
-
-                                                <span class="badge bg-warning text-dark">
-                                                    Menunggu
-                                                </span>
-
-                                            <?php elseif ($booking['status_booking'] === 'Dikonfirmasi'): ?>
-
-                                                <span class="badge bg-success">
-                                                    Dikonfirmasi
-                                                </span>
-
-                                            <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
-
-                                                <span class="badge bg-danger">
-                                                    Ditolak
-                                                </span>
-
-                                            <?php else: ?>
-
-                                                <span class="badge bg-secondary">
-                                                    <?= htmlspecialchars($booking['status_booking']); ?>
-                                                </span>
-
-=======
                                         <!-- KOLOM STATUS -->
                                         <td>
                                             <?php if ($status === 'Menunggu'): ?>
@@ -432,36 +391,10 @@ if (!$query) {
 
                                             <?php else: ?>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($status); ?></span>
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
                                             <?php endif; ?>
 
                                         </td>
 
-<<<<<<< HEAD
-                                        <!-- STATUS PEMBAYARAN -->
-                                        <td>
-
-                                            <?php
-
-                                            $statusBayar = $booking['status_pembayaran'] ?? 'Belum Bayar';
-
-                                            if ($statusBayar === 'Terverifikasi') {
-                                                $warnaBayar = 'success';
-                                            } elseif ($statusBayar === 'Menunggu') {
-                                                $warnaBayar = 'warning text-dark';
-                                            } elseif ($statusBayar === 'Ditolak') {
-                                                $warnaBayar = 'danger';
-                                            } else {
-                                                $warnaBayar = 'secondary';
-                                            }
-
-                                            ?>
-
-                                            <span class="badge bg-<?= $warnaBayar; ?>">
-                                                <?= htmlspecialchars($statusBayar); ?>
-                                            </span>
-
-=======
                                         <!-- KOLOM AKSI -->
                                         <td>
                                             <?php if ($status === 'Dikonfirmasi'): ?>
@@ -499,7 +432,6 @@ if (!$query) {
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
                                         </td>
 
                                         <!-- AKSI BOOKING -->
@@ -611,33 +543,6 @@ if (!$query) {
         $(document).ready(function() {
 
             $('#tabelRiwayat').DataTable({
-<<<<<<< HEAD
-
-                pageLength: 6,
-
-                lengthMenu: [
-                    [6, 10, 25, 50, -1],
-                    [6, 10, 25, 50, "Semua"]
-                ],
-
-                language: {
-
-                    search: "Cari wisata:",
-
-                    lengthMenu: "Tampilkan _MENU_ data per halaman",
-
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-
-                    infoEmpty: "Tidak ada data yang tersedia",
-
-                    zeroRecords: "Nama paket atau destinasi tidak ditemukan",
-
-                    paginate: {
-                        first: "Pertama",
-                        last: "Terakhir",
-                        next: "Berikutnya",
-                        previous: "Sebelumnya"
-=======
                 "pageLength": 6,
                 "lengthMenu": [ [6, 10, 25, 50, -1], [6, 10, 25, 50, "Semua"] ],
                 "language": {
@@ -651,7 +556,6 @@ if (!$query) {
                         "last": "Terakhir",
                         "next": "Berikutnya",
                         "previous": "Sebelumnya"
->>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
                     }
 
                 }
