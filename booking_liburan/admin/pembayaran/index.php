@@ -39,6 +39,54 @@ $namaAdmin = $_SESSION['nama'] ?? 'Admin';
 include __DIR__ . '/../partials/header.php';
 ?>
 
+
+<?php
+$pesan = $_GET['pesan'] ?? '';
+
+$notifikasi = [
+    'berhasil_verifikasi' => [
+        'success',
+        'Pembayaran berhasil diverifikasi.'
+    ],
+    'berhasil_ditolak' => [
+        'warning',
+        'Pembayaran berhasil ditolak.'
+    ],
+    'gagal_verifikasi' => [
+        'danger',
+        'Pembayaran gagal diverifikasi.'
+    ],
+    'gagal_ditolak' => [
+        'danger',
+        'Pembayaran gagal ditolak.'
+    ],
+    'data_tidak_ditemukan' => [
+        'danger',
+        'Data pembayaran tidak ditemukan.'
+    ],
+    'status_sudah_diproses' => [
+        'info',
+        'Pembayaran sudah pernah diproses.'
+    ],
+    'id_tidak_valid' => [
+        'danger',
+        'ID pembayaran tidak valid.'
+    ]
+];
+
+if (isset($notifikasi[$pesan])):
+    $info = $notifikasi[$pesan];
+?>
+    <div class="alert alert-<?= $info[0]; ?> alert-dismissible fade show">
+        <?= htmlspecialchars($info[1]); ?>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+<?php endif; ?>
+
+
 <div class="mb-4">
     <h1 class="page-title">Data Pembayaran</h1>
 
@@ -53,7 +101,7 @@ include __DIR__ . '/../partials/header.php';
 
         <div class="table-responsive">
             <table id="tabelPembayaran"
-                   class="table table-bordered table-hover table-striped align-middle w-100">
+                class="table table-bordered table-hover table-striped align-middle w-100">
 
                 <thead class="table-primary">
                     <tr>
@@ -70,103 +118,113 @@ include __DIR__ . '/../partials/header.php';
                 </thead>
 
                 <tbody>
-                <?php
-                $no = 1;
+                    <?php
+                    $no = 1;
 
-                if (mysqli_num_rows($query) > 0):
-                    while ($p = mysqli_fetch_assoc($query)):
+                    if (mysqli_num_rows($query) > 0):
+                        while ($p = mysqli_fetch_assoc($query)):
 
-                        $status = $p['status_pembayaran'] ?? 'Menunggu';
+                            $status = $p['status_pembayaran'] ?? 'Menunggu';
 
-                        if ($status === 'Terverifikasi') {
-                            $badge = 'bg-success';
-                        } elseif ($status === 'Ditolak') {
-                            $badge = 'bg-danger';
-                        } else {
-                            $badge = 'bg-warning text-dark';
-                        }
-                ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
+                            if ($status === 'Terverifikasi') {
+                                $badge = 'bg-success';
+                            } elseif ($status === 'Ditolak') {
+                                $badge = 'bg-danger';
+                            } else {
+                                $badge = 'bg-warning text-dark';
+                            }
+                    ?>
+                            <tr>
+                                <td><?= $no++; ?></td>
 
-                        <td>
-                            <?= htmlspecialchars($p['nama_pengguna'] ?? '-'); ?>
-                        </td>
+                                <td>
+                                    <?= htmlspecialchars($p['nama_pengguna'] ?? '-'); ?>
+                                </td>
 
-                        <td>
-                            <?= htmlspecialchars($p['nama_paket'] ?? '-'); ?>
-                        </td>
+                                <td>
+                                    <?= htmlspecialchars($p['nama_paket'] ?? '-'); ?>
+                                </td>
 
-                        <td class="text-nowrap">
-                            <?= htmlspecialchars($p['tanggal_bayar'] ?? '-'); ?>
-                        </td>
+                                <td class="text-nowrap">
+                                    <?= htmlspecialchars($p['tanggal_bayar'] ?? '-'); ?>
+                                </td>
 
-                        <td>
-                            <?= htmlspecialchars($p['metode_pembayaran'] ?? '-'); ?>
-                        </td>
+                                <td>
+                                    <?= htmlspecialchars($p['metode_pembayaran'] ?? '-'); ?>
+                                </td>
 
-                        <td class="text-nowrap"
-                            data-order="<?= (float) $p['jumlah_bayar']; ?>">
-                            Rp <?= number_format(
-                                (float) $p['jumlah_bayar'],
-                                0,
-                                ',',
-                                '.'
-                            ); ?>
-                        </td>
+                                <td class="text-nowrap"
+                                    data-order="<?= (float) $p['jumlah_bayar']; ?>">
+                                    Rp <?= number_format(
+                                            (float) $p['jumlah_bayar'],
+                                            0,
+                                            ',',
+                                            '.'
+                                        ); ?>
+                                </td>
 
-                        <td class="text-nowrap">
-                            <?php if (!empty($p['bukti_pembayaran'])): ?>
 
-                                <a href="../../uploads/<?= rawurlencode(basename($p['bukti_pembayaran'])); ?>"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   class="btn btn-info btn-sm">
-                                    Lihat Bukti
-                                </a>
+                                <td class="text-nowrap">
+                                    <?php
+                                    $namaFile = basename($p['bukti_pembayaran'] ?? '');
 
-                            <?php else: ?>
+                                    $pathFile = __DIR__ . '/../../uploads/bukti_pembayaran/' . $namaFile;
 
-                                <span class="text-muted">
-                                    Belum ada bukti
-                                </span>
+                                    $urlFile = '/booking_liburan/uploads/bukti_pembayaran/' . rawurlencode($namaFile);
+                                    ?>
 
-                            <?php endif; ?>
-                        </td>
+                                    <?php if ($namaFile !== '' && file_exists($pathFile)): ?>
 
-                        <td>
-                            <span class="badge <?= $badge; ?>">
-                                <?= htmlspecialchars($status); ?>
-                            </span>
-                        </td>
+                                        <a href="<?= htmlspecialchars($urlFile); ?>"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="btn btn-info btn-sm">
+                                            Lihat Bukti
+                                        </a>
 
-                        <td class="text-nowrap">
-                            <?php if ($status === 'Menunggu'): ?>
+                                    <?php else: ?>
 
-                                <a href="verifikasi.php?id=<?= (int) $p['id_pembayaran']; ?>"
-                                   class="btn btn-success btn-sm mb-1"
-                                   onclick="return confirm('Verifikasi pembayaran ini?')">
-                                    Verifikasi
-                                </a>
+                                        <span class="text-danger">
+                                            File tidak ditemukan
+                                        </span>
 
-                                <a href="tolak.php?id=<?= (int) $p['id_pembayaran']; ?>"
-                                   class="btn btn-danger btn-sm mb-1"
-                                   onclick="return confirm('Tolak pembayaran ini?')">
-                                    Tolak
-                                </a>
+                                    <?php endif; ?>
+                                </td>
 
-                            <?php else: ?>
 
-                                <span class="text-muted">Selesai</span>
+                                <td>
+                                    <span class="badge <?= $badge; ?>">
+                                        <?= htmlspecialchars($status); ?>
+                                    </span>
+                                </td>
 
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                                <td class="text-nowrap">
+                                    <?php if ($status === 'Menunggu'): ?>
 
-                <?php
-                    endwhile;
-                endif;
-                ?>
+                                        <a href="verifikasi.php?id=<?= (int) $p['id_pembayaran']; ?>"
+                                            class="btn btn-success btn-sm mb-1"
+                                            onclick="return confirm('Verifikasi pembayaran ini?')">
+                                            Verifikasi
+                                        </a>
+
+                                        <a href="tolak.php?id=<?= (int) $p['id_pembayaran']; ?>"
+                                            class="btn btn-danger btn-sm mb-1"
+                                            onclick="return confirm('Tolak pembayaran ini?')">
+                                            Tolak
+                                        </a>
+
+                                    <?php else: ?>
+
+                                        <span class="text-muted">Selesai</span>
+
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+
+                    <?php
+                        endwhile;
+                    endif;
+                    ?>
                 </tbody>
 
             </table>
@@ -189,31 +247,28 @@ include __DIR__ . '/../partials/header.php';
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-$(document).ready(function () {
-    $('#tabelPembayaran').DataTable({
-        pageLength: 5,
-        lengthMenu: [5, 10, 25, 50],
-        order: [],
-        columnDefs: [
-            {
+    $(document).ready(function() {
+        $('#tabelPembayaran').DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            order: [],
+            columnDefs: [{
                 targets: [0, 6, 8],
                 orderable: false,
                 searchable: false
+            }],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data yang ditampilkan",
+                infoFiltered: "(difilter dari _MAX_ total data)",
+                zeroRecords: "Data pembayaran tidak ditemukan",
+                emptyTable: "Belum ada data pembayaran",
+                paginate: {}
             }
-        ],
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data yang ditampilkan",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data pembayaran tidak ditemukan",
-            emptyTable: "Belum ada data pembayaran",
-            paginate: {
-            }
-        }
+        });
     });
-});
 </script>
 
 <?php include __DIR__ . '/../partials/footer.php'; ?>

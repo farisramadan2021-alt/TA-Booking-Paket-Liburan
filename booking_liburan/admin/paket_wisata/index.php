@@ -39,11 +39,6 @@ include __DIR__ . '/../partials/header.php';
         border-radius: 8px;
     }
 
-    .deskripsi-paket {
-        min-width: 200px;
-        max-width: 300px;
-    }
-
     #tabelPaket thead th {
         white-space: nowrap;
         vertical-align: middle;
@@ -92,7 +87,6 @@ include __DIR__ . '/../partials/header.php';
                         <th>Destinasi</th>
                         <th>Durasi</th>
                         <th>Harga</th>
-                        <th>Deskripsi</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -139,10 +133,6 @@ include __DIR__ . '/../partials/header.php';
                                         ',',
                                         '.'
                                     ); ?>
-                            </td>
-
-                            <td class="deskripsi-paket">
-                                <?= htmlspecialchars($data['deskripsi']); ?>
                             </td>
 
                             <td>
@@ -206,7 +196,7 @@ include __DIR__ . '/../partials/header.php';
             lengthMenu: [5, 10, 25, 50],
             order: [],
             columnDefs: [{
-                targets: [1, 8],
+                targets: [1, 7],
                 orderable: false
             }],
             language: {
@@ -224,35 +214,35 @@ include __DIR__ . '/../partials/header.php';
 </script>
 
 <script>
-function konfirmasiHapus(event, tombol) {
+    function konfirmasiHapus(event, tombol) {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    const urlHapus = tombol.getAttribute('href');
+        const urlHapus = tombol.getAttribute('href');
 
-    Swal.fire({
-        title: 'Hapus Paket Wisata?',
-        text: 'Apakah kamu yakin ingin menghapus paket wisata ini?',
-        icon: 'warning',
+        Swal.fire({
+            title: 'Hapus Paket Wisata?',
+            text: 'Apakah kamu yakin ingin menghapus paket wisata ini?',
+            icon: 'warning',
 
-        showCancelButton: true,
+            showCancelButton: true,
 
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
 
-        confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
 
-        reverseButtons: true
-    }).then((result) => {
+            reverseButtons: true
+        }).then((result) => {
 
-        if (result.isConfirmed) {
-            window.location.href = urlHapus;
-        }
+            if (result.isConfirmed) {
+                window.location.href = urlHapus;
+            }
 
-    });
+        });
 
-    return false;
-}
+        return false;
+    }
 </script>
 <?php include __DIR__ . '/../partials/footer.php'; ?>

@@ -12,6 +12,7 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
 $id_user = (int) $_SESSION['id_user'];
 
 // Ambil seluruh riwayat booking milik user (pencarian diserahkan ke DataTable agar langsung filter real-time)
+
 $stmt = mysqli_prepare(
     $conn,
     "SELECT
@@ -23,13 +24,26 @@ $stmt = mysqli_prepare(
         b.status_booking,
         p.nama_paket,
         p.destinasi,
-        p.gambar
+        p.gambar,
+        pb.status_pembayaran
+
      FROM booking b
+
      JOIN paket_wisata p
         ON b.id_paket = p.id_paket
+
+     LEFT JOIN pembayaran pb
+        ON pb.id_pembayaran = (
+            SELECT MAX(pb2.id_pembayaran)
+            FROM pembayaran pb2
+            WHERE pb2.id_booking = b.id_booking
+        )
+
      WHERE b.id_user = ?
+
      ORDER BY b.id_booking DESC"
 );
+
 
 if (!$stmt) {
     die("Query error: " . mysqli_error($conn));
@@ -55,7 +69,7 @@ if (!$query) {
     <title>Riwayat Booking</title>
 
     <link rel="stylesheet" href="../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
-    
+
     <!-- CSS DataTables Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
@@ -154,6 +168,7 @@ if (!$query) {
                         <!-- Tabel dengan ID DataTable -->
                         <table id="tabelRiwayat" class="table table-hover align-middle w-100">
 
+
                             <thead class="table-primary">
                                 <tr>
                                     <th>No</th>
@@ -162,12 +177,11 @@ if (!$query) {
                                     <th>Keberangkatan</th>
                                     <th>Peserta</th>
                                     <th>Total Harga</th>
-                                    <th>Status</th>
+                                    <th>Status Booking</th>
+                                    <th>Status Pembayaran</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-
-
                             <tbody>
 
 
@@ -237,11 +251,11 @@ if (!$query) {
 
                                         <td class="fw-bold text-primary">
                                             Rp <?= number_format(
-                                                $booking['total_harga'],
-                                                0,
-                                                ',',
-                                                '.'
-                                            ); ?>
+                                                    $booking['total_harga'],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                ); ?>
                                         </td>
 
 
@@ -283,24 +297,69 @@ if (!$query) {
 
                                         </td>
 
-                                        <td>
 
+                                        <!-- KOLOM STATUS PEMBAYARAN -->
+                                        <td>
+                                            <?php
+                                            $statusBayar = $booking['status_pembayaran'] ?? 'Belum Bayar';
+
+                                            if ($statusBayar === 'Terverifikasi') {
+                                                $warnaBayar = 'success';
+                                            } elseif ($statusBayar === 'Menunggu') {
+                                                $warnaBayar = 'warning text-dark';
+                                            } elseif ($statusBayar === 'Ditolak') {
+                                                $warnaBayar = 'danger';
+                                            } else {
+                                                $warnaBayar = 'secondary';
+                                            }
+                                            ?>
+
+                                            <span class="badge bg-<?= $warnaBayar; ?>">
+                                                <?= htmlspecialchars($statusBayar); ?>
+                                            </span>
+                                        </td>
+
+                                        <!-- KOLOM AKSI -->
+                                        <td>
                                             <?php if ($booking['status_booking'] === 'Dikonfirmasi'): ?>
 
-                                                <a
-                                                    href="pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
-                                                    class="btn btn-primary btn-sm">
-                                                    Bayar Sekarang
-                                                </a>
+                                                <?php if ($statusBayar === 'Terverifikasi'): ?>
+
+                                                    <a href="Pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+                                                        class="btn btn-success btn-sm">
+                                                        Lihat Pembayaran
+                                                    </a>
+
+                                                <?php elseif ($statusBayar === 'Menunggu'): ?>
+
+                                                    <a href="Pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+                                                        class="btn btn-info btn-sm">
+                                                        Lihat Pembayaran
+                                                    </a>
+
+                                                <?php elseif ($statusBayar === 'Ditolak'): ?>
+
+                                                    <a href="Pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+                                                        class="btn btn-danger btn-sm">
+                                                        Upload Ulang
+                                                    </a>
+
+                                                <?php else: ?>
+
+                                                    <a href="Pembayaran.php?id=<?= (int) $booking['id_booking']; ?>"
+                                                        class="btn btn-primary btn-sm">
+                                                        Bayar Sekarang
+                                                    </a>
+
+                                                <?php endif; ?>
 
                                             <?php else: ?>
 
                                                 <span class="text-muted">-</span>
 
                                             <?php endif; ?>
-
-
                                         </td>
+
 
                                     </tr>
 
@@ -364,7 +423,10 @@ if (!$query) {
         $(document).ready(function() {
             $('#tabelRiwayat').DataTable({
                 "pageLength": 6, // Membatasi maksimal 6 data per halaman
-                "lengthMenu": [ [6, 10, 25, 50, -1], [6, 10, 25, 50, "Semua"] ], // Pilihan dropdown jumlah baris
+                "lengthMenu": [
+                    [6, 10, 25, 50, -1],
+                    [6, 10, 25, 50, "Semua"]
+                ], // Pilihan dropdown jumlah baris
                 "language": {
                     "search": "Cari wisata:",
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
@@ -383,4 +445,5 @@ if (!$query) {
     </script>
 
 </body>
+
 </html>

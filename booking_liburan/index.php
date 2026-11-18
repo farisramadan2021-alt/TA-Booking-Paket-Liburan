@@ -60,9 +60,9 @@ if (!empty($paketList)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-        content="RPBNusa menyediakan berbagai pilihan paket wisata menarik dengan proses pemesanan yang mudah.">
+        content="ADF Travel menyediakan berbagai pilihan paket wisata menarik dengan proses pemesanan yang mudah.">
 
-    <title>RPBNusa - Temukan Liburan Impianmu</title>
+    <title>ADF Travel - Temukan Liburan Impianmu</title>
 
     <!-- Bootstrap 5.3.8 -->
     <link rel="stylesheet"
@@ -387,13 +387,13 @@ if (!empty($paketList)) {
                     </span>
 
                     <h2 class="section-title">
-                        Mengenal Lebih Dekat RPBNusa
+                        Mengenal Lebih Dekat ADF Travel
                     </h2>
 
                     <p class="text-secondary mt-4"
                         style="line-height: 1.9;">
 
-                        RPBNusa merupakan platform berbasis website
+                        ADF Travel merupakan platform berbasis website
                         yang membantu pengguna menemukan dan melakukan
                         pemesanan paket wisata dengan mudah.
 
@@ -424,7 +424,7 @@ if (!empty($paketList)) {
                         <h5 class="fw-bold"
                             style="color: var(--primary);">
 
-                            Mengapa Memilih RPBNusa?
+                            Mengapa Memilih ADF Travel?
 
                         </h5>
 
@@ -553,7 +553,7 @@ if (!empty($paketList)) {
                 <div class="col-md-6 text-center text-md-start">
 
                     <div class="footer-brand">
-                        ✈️ RPBNusa
+                        ADF Travel
                     </div>
 
                     <p class="text-secondary small mb-0">
