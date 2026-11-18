@@ -11,8 +11,21 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
 
 $id_user = (int) $_SESSION['id_user'];
 
-// Ambil filter status dari URL jika ada
+// Daftar status yang valid beserta tampilan badge-nya
+$daftar_status = [
+    'Menunggu'            => ['badge' => 'bg-warning text-dark', 'btn' => 'warning text-dark'],
+    'Dikonfirmasi'        => ['badge' => 'bg-success',           'btn' => 'success'],
+    'Proses'              => ['badge' => 'bg-info text-dark',    'btn' => 'info text-dark'],
+    'Menunggu Verifikasi' => ['badge' => 'bg-primary',           'btn' => 'primary'],
+    'Lunas'               => ['badge' => 'bg-success',           'btn' => 'success'],
+    'Ditolak'             => ['badge' => 'bg-danger',            'btn' => 'danger'],
+];
+
+// Ambil filter status dari URL (hanya diterima jika termasuk status yang valid)
 $filter_status = isset($_GET['status']) ? $_GET['status'] : '';
+if ($filter_status !== '' && !array_key_exists($filter_status, $daftar_status)) {
+    $filter_status = '';
+}
 
 // Susun Query dengan Prepared Statement menyesuaikan filter status
 $sql = "SELECT
@@ -22,6 +35,7 @@ $sql = "SELECT
         b.jumlah_peserta,
         b.total_harga,
         b.status_booking,
+        b.bukti_pembayaran,
         p.nama_paket,
         p.destinasi,
         p.gambar
@@ -67,7 +81,7 @@ if (!$query) {
     <title>Riwayat Booking</title>
 
     <link rel="stylesheet" href="../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
-    
+
     <!-- CSS DataTables Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
@@ -95,6 +109,23 @@ if (!$query) {
             height: 70px;
             object-fit: cover;
             border-radius: 8px;
+        }
+
+        /* Tanda "Proses" berkedip pelan agar terlihat sedang berjalan */
+        .badge-proses {
+            animation: berkedip 1.6s ease-in-out infinite;
+        }
+
+        @keyframes berkedip {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .55; }
+        }
+
+        .catatan-status {
+            display: block;
+            font-size: .75rem;
+            color: #6c757d;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -149,11 +180,15 @@ if (!$query) {
         <div class="card shadow-sm mb-4">
             <div class="card-body py-3 d-flex align-items-center flex-wrap gap-2">
                 <span class="fw-semibold text-secondary me-2">Filter Status:</span>
-                <div class="btn-group" role="group">
-                    <a href="riwayat_booking.php" class="btn btn-sm <?= ($filter_status == '') ? 'btn-primary' : 'btn-outline-primary'; ?>">Semua</a>
-                    <a href="riwayat_booking.php?status=Menunggu" class="btn btn-sm <?= ($filter_status == 'Menunggu') ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'; ?>">Menunggu</a>
-                    <a href="riwayat_booking.php?status=Dikonfirmasi" class="btn btn-sm <?= ($filter_status == 'Dikonfirmasi') ? 'btn-success' : 'btn-outline-success'; ?>">Dikonfirmasi</a>
-                    <a href="riwayat_booking.php?status=Ditolak" class="btn btn-sm <?= ($filter_status == 'Ditolak') ? 'btn-danger' : 'btn-outline-danger'; ?>">Ditolak</a>
+                <div class="btn-group flex-wrap" role="group">
+                    <a href="riwayat_booking.php"
+                       class="btn btn-sm <?= ($filter_status === '') ? 'btn-primary' : 'btn-outline-primary'; ?>">Semua</a>
+                    <?php foreach ($daftar_status as $nama_status => $gaya): ?>
+                        <a href="riwayat_booking.php?status=<?= urlencode($nama_status); ?>"
+                           class="btn btn-sm <?= ($filter_status === $nama_status) ? 'btn-' . $gaya['btn'] : 'btn-outline-' . $gaya['btn']; ?>">
+                            <?= htmlspecialchars($nama_status); ?>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -184,6 +219,8 @@ if (!$query) {
                                 <?php
                                 $no = 1;
                                 while ($booking = mysqli_fetch_assoc($query)):
+                                    $status = $booking['status_booking'];
+                                    $id_booking = (int) $booking['id_booking'];
                                 ?>
                                     <tr>
                                         <td>
@@ -218,28 +255,71 @@ if (!$query) {
                                         <td class="fw-bold text-primary">
                                             Rp <?= number_format($booking['total_harga'], 0, ',', '.'); ?>
                                         </td>
+
+                                        <!-- KOLOM STATUS -->
                                         <td>
-                                            <?php if ($booking['status_booking'] === 'Menunggu'): ?>
+                                            <?php if ($status === 'Menunggu'): ?>
                                                 <span class="badge bg-warning text-dark">Menunggu</span>
-                                            <?php elseif ($booking['status_booking'] === 'Dikonfirmasi'): ?>
+                                                <span class="catatan-status">Menunggu konfirmasi admin</span>
+
+                                            <?php elseif ($status === 'Dikonfirmasi'): ?>
                                                 <span class="badge bg-success">Dikonfirmasi</span>
-                                            <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
+                                                <span class="catatan-status">Silakan lakukan pembayaran</span>
+
+                                            <?php elseif ($status === 'Proses'): ?>
+                                                <span class="badge bg-info text-dark badge-proses">Proses</span>
+                                                <span class="catatan-status">Lengkapi validasi data &amp; kirim bukti bayar</span>
+
+                                            <?php elseif ($status === 'Menunggu Verifikasi'): ?>
+                                                <span class="badge bg-primary">Menunggu Verifikasi</span>
+                                                <span class="catatan-status">Bukti bayar sedang dicek admin</span>
+
+                                            <?php elseif ($status === 'Lunas'): ?>
+                                                <span class="badge bg-success">Lunas</span>
+                                                <span class="catatan-status">Pembayaran sudah diverifikasi</span>
+
+                                            <?php elseif ($status === 'Ditolak'): ?>
                                                 <span class="badge bg-danger">Ditolak</span>
+
                                             <?php else: ?>
-                                                <span class="badge bg-secondary"><?= htmlspecialchars($booking['status_booking']); ?></span>
+                                                <span class="badge bg-secondary"><?= htmlspecialchars($status); ?></span>
                                             <?php endif; ?>
                                         </td>
+
+                                        <!-- KOLOM AKSI -->
                                         <td>
-                                            <?php if ($booking['status_booking'] === 'Dikonfirmasi'): ?>
-                                                <a href="pembayaran.php?id=<?= (int) $booking['id_booking']; ?>" class="btn btn-primary btn-sm">
+                                            <?php if ($status === 'Dikonfirmasi'): ?>
+                                                <a href="pembayaran.php?id=<?= $id_booking; ?>" class="btn btn-primary btn-sm">
                                                     Bayar Sekarang
                                                 </a>
-                                            <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
-                                                <a href="proses_hapus_booking.php?id=<?= (int) $booking['id_booking']; ?>" 
-                                                   class="btn btn-danger btn-sm" 
+
+                                            <?php elseif ($status === 'Proses'): ?>
+                                                <a href="validasi_booking.php?id=<?= $id_booking; ?>" class="btn btn-info btn-sm text-dark">
+                                                    Validasi &amp; Kirim Bukti
+                                                </a>
+
+                                            <?php elseif ($status === 'Menunggu Verifikasi'): ?>
+                                                <?php if (!empty($booking['bukti_pembayaran'])): ?>
+                                                    <a href="../uploads/bukti_pembayaran/<?= htmlspecialchars($booking['bukti_pembayaran']); ?>"
+                                                       target="_blank" class="btn btn-outline-primary btn-sm">
+                                                        Lihat Bukti Saya
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+
+                                            <?php elseif ($status === 'Lunas'): ?>
+                                                <a href="struk_booking.php?id=<?= $id_booking; ?>" target="_blank" class="btn btn-success btn-sm">
+                                                    Lihat Bon / Struk
+                                                </a>
+
+                                            <?php elseif ($status === 'Ditolak'): ?>
+                                                <a href="proses_hapus_booking.php?id=<?= $id_booking; ?>"
+                                                   class="btn btn-danger btn-sm"
                                                    onclick="return confirm('Yakin ingin menghapus riwayat pesanan yang ditolak ini?');">
                                                     Hapus
                                                 </a>
+
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
@@ -283,8 +363,8 @@ if (!$query) {
     <script>
         $(document).ready(function() {
             $('#tabelRiwayat').DataTable({
-                "pageLength": 6, 
-                "lengthMenu": [ [6, 10, 25, 50, -1], [6, 10, 25, 50, "Semua"] ], 
+                "pageLength": 6,
+                "lengthMenu": [ [6, 10, 25, 50, -1], [6, 10, 25, 50, "Semua"] ],
                 "language": {
                     "search": "Cari wisata:",
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",

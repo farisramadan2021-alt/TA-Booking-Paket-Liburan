@@ -40,7 +40,7 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $row['nama'];
             $_SESSION['role'] = 'admin';
 
-            header("Location: ../admin/dashboard.php");
+            header("Location: ../admin/dashboardAdmin.php");
             exit;
         }
     }
