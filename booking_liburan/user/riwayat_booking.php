@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 require_once __DIR__ . "/../config/koneksi.php";
@@ -86,226 +87,232 @@ if (!$query) {
 
 <body>
 
-    <div class="container py-4">
+<div class="container py-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
-            <div>
-                <h2 class="judul mb-1">Riwayat Booking</h2>
-                <p class="text-muted mb-0">
-                    Daftar perjalanan yang pernah kamu pesan.
-                </p>
-            </div>
-
-            <div>
-                <a href="dashboard.php" class="btn btn-secondary">
-                    Kembali Dashboard
-                </a>
-
-                <a href="paket_wisata/index.php" class="btn btn-primary">
-                    + Booking Paket
-                </a>
-            </div>
-
+        <div>
+            <h2 class="judul mb-1">Riwayat Booking</h2>
+            <p class="text-muted mb-0">
+                Daftar perjalanan yang pernah kamu pesan.
+            </p>
         </div>
 
-        <div class="card card-riwayat">
-            <div class="card-body p-3">
+        <div>
+            <a href="dashboard.php" class="btn btn-secondary">
+                Kembali Dashboard
+            </a>
 
-                <div class="table-responsive">
-
-                    <table class="table table-hover align-middle">
-
-                        <thead class="table-primary">
-                            <tr>
-                                <th>No</th>
-                                <th>Paket Wisata</th>
-                                <th>Keberangkatan</th>
-                                <th>Peserta</th>
-                                <th>Total Harga</th>
-                                <th>Status Booking</th>
-                                <th>Status Pembayaran</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            <?php
-                            $no = 1;
-
-                            if (mysqli_num_rows($query) > 0):
-                                while ($data = mysqli_fetch_assoc($query)):
-
-                                    $status = $data['status_booking'] ?? 'Menunggu';
-                                    $status_bayar = $data['status_pembayaran'] ?? '';
-
-                                    $gambar = !empty($data['gambar'])
-                                        ? "../uploads/paket_wisata/" . basename($data['gambar'])
-                                        : "../uploads/paket_wisata/default.jpg";
-                            ?>
-
-                                    <tr>
-
-                                        <td><?= $no++; ?></td>
-
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-
-                                                <img
-                                                    src="<?= htmlspecialchars($gambar); ?>"
-                                                    class="gambar-paket"
-                                                    alt="Foto Paket Wisata"
-                                                    onerror="this.style.display='none';">
-
-                                                <div>
-                                                    <strong>
-                                                        <?= htmlspecialchars($data['nama_paket'] ?? '-'); ?>
-                                                    </strong>
-                                                    <br>
-                                                    <small class="text-muted">
-                                                        <?= htmlspecialchars($data['destinasi'] ?? '-'); ?>
-                                                    </small>
-                                                </div>
-
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <?= !empty($data['tanggal_keberangkatan'])
-                                                ? date('d-m-Y', strtotime($data['tanggal_keberangkatan']))
-                                                : '-'; ?>
-                                        </td>
-
-                                        <td>
-                                            <?= (int) $data['jumlah_peserta']; ?> orang
-                                        </td>
-
-                                        <td class="harga">
-                                            Rp <?= number_format(
-                                                    (float) $data['total_harga'],
-                                                    0,
-                                                    ',',
-                                                    '.'
-                                                ); ?>
-                                        </td>
-
-                                        <td>
-                                            <?php if ($status === 'Dikonfirmasi'): ?>
-                                                <span class="badge bg-success">
-                                                    Dikonfirmasi
-                                                </span>
-                                            <?php elseif ($status === 'Ditolak'): ?>
-                                                <span class="badge bg-danger">
-                                                    Ditolak
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning text-dark">
-                                                    <?= htmlspecialchars($status); ?>
-                                                </span>
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php if ($status !== 'Dikonfirmasi'): ?>
-
-                                                <span class="badge bg-secondary">
-                                                    Belum tersedia
-                                                </span>
-
-                                            <?php elseif ($status_bayar === 'Terverifikasi'): ?>
-
-                                                <span class="badge bg-success">
-                                                    Lunas
-                                                </span>
-
-                                            <?php elseif ($status_bayar === 'Menunggu'): ?>
-
-                                                <span class="badge bg-warning text-dark">
-                                                    Menunggu Verifikasi
-                                                </span>
-
-                                            <?php elseif ($status_bayar === 'Ditolak'): ?>
-
-                                                <span class="badge bg-danger">
-                                                    Ditolak
-                                                </span>
-
-                                            <?php else: ?>
-
-                                                <span class="badge bg-secondary">
-                                                    Belum Dibayar
-                                                </span>
-
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php if ($status === 'Dikonfirmasi'): ?>
-
-                                                <?php if ($status_bayar === 'Terverifikasi'): ?>
-
-                                                    <span class="text-success fw-bold">
-                                                        <i class="bi bi-check-circle"></i>
-                                                        Lunas
-                                                    </span>
-
-                                                <?php elseif ($status_bayar === 'Menunggu'): ?>
-
-                                                    <span class="text-warning">
-                                                        Menunggu verifikasi
-                                                    </span>
-
-                                                <?php else: ?>
-                                                    <span class="text-muted">
-                                                        Booking ditolak
-                                                    </span>
-
-                                                <?php endif; ?>
-
-                                            <?php elseif ($status === 'Ditolak'): ?>
-
-                                                <span class="text-muted">
-                                                    Booking ditolak
-                                                </span>
-
-                                            <?php else: ?>
-
-                                                <span class="text-muted">
-                                                    Menunggu konfirmasi
-                                                </span>
-
-                                            <?php endif; ?>
-                                        </td>
-
-                                    </tr>
-
-                                <?php
-                                endwhile;
-                            else:
-                                ?>
-
-                                <tr>
-                                    <td colspan="8" class="text-center py-4 text-muted">
-                                        Belum ada riwayat booking.
-                                    </td>
-                                </tr>
-
-                            <?php endif; ?>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
+            <a href="paket_wisata/index.php" class="btn btn-primary">
+                + Booking Paket
+            </a>
         </div>
 
     </div>
 
-    <script src="../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+    <div class="card card-riwayat">
+        <div class="card-body p-3">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-primary">
+                        <tr>
+                            <th>No</th>
+                            <th>Paket Wisata</th>
+                            <th>Keberangkatan</th>
+                            <th>Peserta</th>
+                            <th>Total Harga</th>
+                            <th>Status Booking</th>
+                            <th>Status Pembayaran</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <?php
+                    $no = 1;
+
+                    if (mysqli_num_rows($query) > 0):
+                        while ($data = mysqli_fetch_assoc($query)):
+
+                            $status = $data['status_booking'] ?? 'Menunggu';
+                            $status_bayar = $data['status_pembayaran'] ?? '';
+
+                            $gambar = !empty($data['gambar'])
+                                ? "../uploads/paket_wisata/" . basename($data['gambar'])
+                                : "../uploads/paket_wisata/default.jpg";
+                    ?>
+
+                        <tr>
+
+                            <td><?= $no++; ?></td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <img
+                                        src="<?= htmlspecialchars($gambar); ?>"
+                                        class="gambar-paket"
+                                        alt="Foto Paket Wisata"
+                                        onerror="this.style.display='none';">
+
+                                    <div>
+                                        <strong>
+                                            <?= htmlspecialchars($data['nama_paket'] ?? '-'); ?>
+                                        </strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <?= htmlspecialchars($data['destinasi'] ?? '-'); ?>
+                                        </small>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                <?= !empty($data['tanggal_keberangkatan'])
+                                    ? date('d-m-Y', strtotime($data['tanggal_keberangkatan']))
+                                    : '-'; ?>
+                            </td>
+
+                            <td>
+                                <?= (int) $data['jumlah_peserta']; ?> orang
+                            </td>
+
+                            <td class="harga">
+                                Rp <?= number_format(
+                                    (float) $data['total_harga'],
+                                    0,
+                                    ',',
+                                    '.'
+                                ); ?>
+                            </td>
+
+                            <td>
+                                <?php if ($status === 'Dikonfirmasi'): ?>
+                                    <span class="badge bg-success">
+                                        Dikonfirmasi
+                                    </span>
+                                <?php elseif ($status === 'Ditolak'): ?>
+                                    <span class="badge bg-danger">
+                                        Ditolak
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark">
+                                        <?= htmlspecialchars($status); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+
+                            <td>
+                                <?php if ($status !== 'Dikonfirmasi'): ?>
+
+                                    <span class="badge bg-secondary">
+                                        Belum tersedia
+                                    </span>
+
+                                <?php elseif ($status_bayar === 'Terverifikasi'): ?>
+
+                                    <span class="badge bg-success">
+                                        Lunas
+                                    </span>
+
+                                <?php elseif ($status_bayar === 'Menunggu'): ?>
+
+                                    <span class="badge bg-warning text-dark">
+                                        Menunggu Verifikasi
+                                    </span>
+
+                                <?php elseif ($status_bayar === 'Ditolak'): ?>
+
+                                    <span class="badge bg-danger">
+                                        Ditolak
+                                    </span>
+
+                                <?php else: ?>
+
+                                    <span class="badge bg-secondary">
+                                        Belum Dibayar
+                                    </span>
+
+                                <?php endif; ?>
+                            </td>
+
+                            <td>
+                                <?php if ($status === 'Dikonfirmasi'): ?>
+
+                                    <?php if ($status_bayar === 'Terverifikasi'): ?>
+
+                                        <span class="text-success fw-bold">
+                                            <i class="bi bi-check-circle"></i>
+                                            Lunas
+                                        </span>
+
+                                    <?php elseif ($status_bayar === 'Menunggu'): ?>
+
+                                        <span class="text-warning">
+                                            Menunggu verifikasi
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <a
+                                            href="Pembayaran.php?id_booking=<?= (int) $data['id_booking']; ?>"
+                                            class="btn btn-primary btn-sm">
+
+                                            <?= $status_bayar === 'Ditolak'
+                                                ? 'Bayar Ulang'
+                                                : 'Bayar Sekarang'; ?>
+
+                                        </a>
+
+                                    <?php endif; ?>
+
+                                <?php elseif ($status === 'Ditolak'): ?>
+
+                                    <span class="text-muted">
+                                        Booking ditolak
+                                    </span>
+
+                                <?php else: ?>
+
+                                    <span class="text-muted">
+                                        Menunggu konfirmasi
+                                    </span>
+
+                                <?php endif; ?>
+                            </td>
+
+                        </tr>
+
+                    <?php
+                        endwhile;
+                    else:
+                    ?>
+
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                Belum ada riwayat booking.
+                            </td>
+                        </tr>
+
+                    <?php endif; ?>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>
