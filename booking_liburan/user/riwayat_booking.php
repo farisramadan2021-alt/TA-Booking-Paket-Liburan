@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require_once __DIR__ . "/../config/koneksi.php";
@@ -49,6 +48,9 @@ if (!$query) {
     <link rel="stylesheet"
         href="../bo/bootstrap-5.3.8-dist/css/bootstrap.min.css">
 
+    <!-- CSS DataTables Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
     <style>
         body {
             background-color: #e3f2fd;
@@ -82,6 +84,66 @@ if (!$query) {
         .table th {
             white-space: nowrap;
         }
+
+        /* ===== Perapihan DataTables ===== */
+        .dataTables_wrapper .dataTables_length label,
+        .dataTables_wrapper .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+            font-size: 14px;
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        .dataTables_wrapper .dataTables_filter label {
+            justify-content: flex-end;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            width: auto;
+            min-width: 70px;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            width: 240px;
+            margin-left: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTables_info {
+            font-size: 14px;
+            color: #6c757d;
+            padding-top: 0;
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .pagination {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 767px) {
+            .dataTables_wrapper .dataTables_filter label {
+                justify-content: flex-start;
+            }
+
+            .dataTables_wrapper .dataTables_filter input {
+                width: 100%;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                text-align: center;
+                margin-bottom: 8px;
+            }
+
+            .dataTables_wrapper .dataTables_paginate {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 
@@ -112,6 +174,19 @@ if (!$query) {
 
     <div class="card card-riwayat">
         <div class="card-body p-3">
+
+            <!-- Filter status untuk DataTables -->
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                <span class="fw-semibold text-secondary me-1">Filter Status:</span>
+                <div class="btn-group flex-wrap" role="group" id="filterStatus">
+                    <button type="button" class="btn btn-sm btn-outline-primary active" data-status="">Semua</button>
+                    <button type="button" class="btn btn-sm btn-outline-warning text-dark" data-status="Menunggu">Menunggu</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="Dikonfirmasi">Dikonfirmasi</button>
+                    <button type="button" class="btn btn-sm btn-outline-info text-dark" data-status="Proses">Proses</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-status="Lunas" data-col="6">Lunas</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-status="Ditolak">Ditolak</button>
+                </div>
+            </div>
 
             <div class="table-responsive">
 
@@ -246,10 +321,12 @@ if (!$query) {
 
                                     <?php if ($status_bayar === 'Terverifikasi'): ?>
 
-                                        <span class="text-success fw-bold">
-                                            <i class="bi bi-check-circle"></i>
-                                            Lunas
-                                        </span>
+                                        <a
+                                            href="struk_booking.php?id=<?= (int) $data['id_booking']; ?>"
+                                            target="_blank"
+                                            class="btn btn-success btn-sm">
+                                            Lihat Struk
+                                        </a>
 
                                     <?php elseif ($status_bayar === 'Menunggu'): ?>
 
@@ -313,6 +390,61 @@ if (!$query) {
 </div>
 
 <script src="../bo/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var table = $('.table').DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            paging: true,
+            pagingType: 'simple_numbers',
+            searching: true,
+            ordering: true,
+            autoWidth: false,
+            columnDefs: [
+                { orderable: false, targets: [7] }
+            ],
+            dom: "<'row align-items-center mb-2'<'col-md-6 col-12'l><'col-md-6 col-12'f>>" +
+                 "<'row'<'col-12'tr>>" +
+                 "<'row align-items-center mt-2'<'col-md-6 col-12'i><'col-md-6 col-12'p>>",
+            language: {
+                lengthMenu: 'Tampilkan _MENU_ data',
+                search: 'Cari:',
+                searchPlaceholder: 'Cari riwayat booking...',
+                zeroRecords: 'Data tidak ditemukan',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                infoEmpty: 'Tidak ada data yang ditampilkan',
+                infoFiltered: '(difilter dari _MAX_ total data)',
+                paginate: {
+                    previous: 'Sebelumnya',
+                    next: 'Berikutnya'
+                }
+            }
+        });
+
+        // Filter berdasarkan kolom Status Booking (kolom ke-6, indeks 5)
+        $('#filterStatus button').on('click', function () {
+            $('#filterStatus button').removeClass('active');
+            $(this).addClass('active');
+
+            var status = $(this).data('status');
+            var kolom = $(this).data('col') || 5; // Lunas membaca kolom Status Pembayaran (indeks 6)
+
+            table.columns().search('');
+
+            if (status !== '') {
+                table.column(kolom).search('^\\s*' + status + '\\s*$', true, false);
+            }
+
+            table.draw();
+        });
+    });
+</script>
 
 </body>
 </html>

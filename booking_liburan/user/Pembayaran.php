@@ -305,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <button type="submit"
                                 class="btn btn-primary w-100 fw-bold">
-                                Kirim Pembayaran
+                                Kirim Untuk Verifikasi Admin
                             </button>
 
                             <a href="riwayat_booking.php"
