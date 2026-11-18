@@ -240,6 +240,266 @@ if (!$query) {
         <div class="card shadow-sm mb-4">
 
             <div class="card-body py-3 d-flex align-items-center flex-wrap gap-2">
+<<<<<<< HEAD
+
+                <span class="fw-semibold text-secondary me-2">
+                    Filter Status:
+                </span>
+
+                <div class="btn-group" role="group">
+
+                    <a href="riwayat_booking.php"
+                       class="btn btn-sm <?= ($filter_status == '') ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                        Semua
+                    </a>
+
+                    <a href="riwayat_booking.php?status=Menunggu"
+                       class="btn btn-sm <?= ($filter_status == 'Menunggu') ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'; ?>">
+                        Menunggu
+                    </a>
+
+                    <a href="riwayat_booking.php?status=Dikonfirmasi"
+                       class="btn btn-sm <?= ($filter_status == 'Dikonfirmasi') ? 'btn-success' : 'btn-outline-success'; ?>">
+                        Dikonfirmasi
+                    </a>
+
+                    <a href="riwayat_booking.php?status=Ditolak"
+                       class="btn btn-sm <?= ($filter_status == 'Ditolak') ? 'btn-danger' : 'btn-outline-danger'; ?>">
+                        Ditolak
+                    </a>
+
+=======
+                <span class="fw-semibold text-secondary me-2">Filter Status:</span>
+                <div class="btn-group flex-wrap" role="group">
+                    <a href="riwayat_booking.php"
+                       class="btn btn-sm <?= ($filter_status === '') ? 'btn-primary' : 'btn-outline-primary'; ?>">Semua</a>
+                    <?php foreach ($daftar_status as $nama_status => $gaya): ?>
+                        <a href="riwayat_booking.php?status=<?= urlencode($nama_status); ?>"
+                           class="btn btn-sm <?= ($filter_status === $nama_status) ? 'btn-' . $gaya['btn'] : 'btn-outline-' . $gaya['btn']; ?>">
+                            <?= htmlspecialchars($nama_status); ?>
+                        </a>
+                    <?php endforeach; ?>
+>>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
+                </div>
+            </div>
+        </div>
+
+        <!-- TABEL RIWAYAT BOOKING -->
+        <?php if (mysqli_num_rows($query) > 0): ?>
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table id="tabelRiwayat"
+                               class="table table-hover align-middle w-100">
+
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal Pemesanan</th>
+                                    <th>Paket Wisata</th>
+                                    <th>Keberangkatan</th>
+                                    <th>Peserta</th>
+                                    <th>Total Harga</th>
+                                    <th>Status Booking</th>
+                                    <th>Status Pembayaran</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <?php
+                                $no = 1;
+
+                                while ($booking = mysqli_fetch_assoc($query)):
+                                    $status = $booking['status_booking'];
+                                    $id_booking = (int) $booking['id_booking'];
+                                ?>
+
+                                    <tr>
+
+                                        <td>
+                                            <?= $no++; ?>
+                                        </td>
+
+                                        <td>
+                                            <?= date('d-m-Y', strtotime($booking['tanggal_booking'])); ?>
+                                        </td>
+
+                                        <td>
+
+                                            <div class="d-flex align-items-center">
+
+                                                <?php if (!empty($booking['gambar'])): ?>
+
+                                                    <img
+                                                        src="../uploads/paket_wisata/<?= htmlspecialchars($booking['gambar']); ?>"
+                                                        class="gambar-paket me-3"
+                                                        alt="<?= htmlspecialchars($booking['nama_paket']); ?>">
+
+                                                <?php endif; ?>
+
+                                                <div>
+
+                                                    <div class="fw-bold">
+                                                        <?= htmlspecialchars($booking['nama_paket']); ?>
+                                                    </div>
+
+                                                    <small class="text-muted">
+                                                        <?= htmlspecialchars($booking['destinasi']); ?>
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+                                        <td>
+                                            <?= date('d-m-Y', strtotime($booking['tanggal_keberangkatan'])); ?>
+                                        </td>
+
+                                        <td>
+                                            <?= (int) $booking['jumlah_peserta']; ?> orang
+                                        </td>
+
+                                        <td class="fw-bold text-primary">
+                                            Rp <?= number_format(
+                                                $booking['total_harga'],
+                                                0,
+                                                ',',
+                                                '.'
+                                            ); ?>
+                                        </td>
+
+<<<<<<< HEAD
+                                        <!-- STATUS BOOKING -->
+                                        <td>
+
+                                            <?php if ($booking['status_booking'] === 'Menunggu'): ?>
+
+                                                <span class="badge bg-warning text-dark">
+                                                    Menunggu
+                                                </span>
+
+                                            <?php elseif ($booking['status_booking'] === 'Dikonfirmasi'): ?>
+
+                                                <span class="badge bg-success">
+                                                    Dikonfirmasi
+                                                </span>
+
+                                            <?php elseif ($booking['status_booking'] === 'Ditolak'): ?>
+
+                                                <span class="badge bg-danger">
+                                                    Ditolak
+                                                </span>
+
+                                            <?php else: ?>
+
+                                                <span class="badge bg-secondary">
+                                                    <?= htmlspecialchars($booking['status_booking']); ?>
+                                                </span>
+
+=======
+                                        <!-- KOLOM STATUS -->
+                                        <td>
+                                            <?php if ($status === 'Menunggu'): ?>
+                                                <span class="badge bg-warning text-dark">Menunggu</span>
+                                                <span class="catatan-status">Menunggu konfirmasi admin</span>
+
+                                            <?php elseif ($status === 'Dikonfirmasi'): ?>
+                                                <span class="badge bg-success">Dikonfirmasi</span>
+                                                <span class="catatan-status">Silakan lakukan pembayaran</span>
+
+                                            <?php elseif ($status === 'Proses'): ?>
+                                                <span class="badge bg-info text-dark badge-proses">Proses</span>
+                                                <span class="catatan-status">Lengkapi validasi data &amp; kirim bukti bayar</span>
+
+                                            <?php elseif ($status === 'Menunggu Verifikasi'): ?>
+                                                <span class="badge bg-primary">Menunggu Verifikasi</span>
+                                                <span class="catatan-status">Bukti bayar sedang dicek admin</span>
+
+                                            <?php elseif ($status === 'Lunas'): ?>
+                                                <span class="badge bg-success">Lunas</span>
+                                                <span class="catatan-status">Pembayaran sudah diverifikasi</span>
+
+                                            <?php elseif ($status === 'Ditolak'): ?>
+                                                <span class="badge bg-danger">Ditolak</span>
+
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary"><?= htmlspecialchars($status); ?></span>
+>>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
+                                            <?php endif; ?>
+
+                                        </td>
+
+<<<<<<< HEAD
+                                        <!-- STATUS PEMBAYARAN -->
+                                        <td>
+
+                                            <?php
+
+                                            $statusBayar = $booking['status_pembayaran'] ?? 'Belum Bayar';
+
+                                            if ($statusBayar === 'Terverifikasi') {
+                                                $warnaBayar = 'success';
+                                            } elseif ($statusBayar === 'Menunggu') {
+                                                $warnaBayar = 'warning text-dark';
+                                            } elseif ($statusBayar === 'Ditolak') {
+                                                $warnaBayar = 'danger';
+                                            } else {
+                                                $warnaBayar = 'secondary';
+                                            }
+
+                                            ?>
+
+                                            <span class="badge bg-<?= $warnaBayar; ?>">
+                                                <?= htmlspecialchars($statusBayar); ?>
+                                            </span>
+
+=======
+                                        <!-- KOLOM AKSI -->
+                                        <td>
+                                            <?php if ($status === 'Dikonfirmasi'): ?>
+                                                <a href="pembayaran.php?id=<?= $id_booking; ?>" class="btn btn-primary btn-sm">
+                                                    Bayar Sekarang
+                                                </a>
+
+                                            <?php elseif ($status === 'Proses'): ?>
+                                                <a href="validasi_booking.php?id=<?= $id_booking; ?>" class="btn btn-info btn-sm text-dark">
+                                                    Validasi &amp; Kirim Bukti
+                                                </a>
+
+                                            <?php elseif ($status === 'Menunggu Verifikasi'): ?>
+                                                <?php if (!empty($booking['bukti_pembayaran'])): ?>
+                                                    <a href="../uploads/bukti_pembayaran/<?= htmlspecialchars($booking['bukti_pembayaran']); ?>"
+                                                       target="_blank" class="btn btn-outline-primary btn-sm">
+                                                        Lihat Bukti Saya
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+
+                                            <?php elseif ($status === 'Lunas'): ?>
+                                                <a href="struk_booking.php?id=<?= $id_booking; ?>" target="_blank" class="btn btn-success btn-sm">
+                                                    Lihat Bon / Struk
+                                                </a>
+
+                                            <?php elseif ($status === 'Ditolak'): ?>
+                                                <a href="proses_hapus_booking.php?id=<?= $id_booking; ?>"
+                                                   class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('Yakin ingin menghapus riwayat pesanan yang ditolak ini?');">
+                                                    Hapus
+                                                </a>
+
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+>>>>>>> 3033be54bbd224614777619b30ad2d9b7a67d1f9
                                         </td>
 
                                         <!-- AKSI BOOKING -->

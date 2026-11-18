@@ -18,6 +18,12 @@ if (isset($_POST['login'])) {
     $identitas = trim($_POST['identitas'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // Jika administrator mengetik username "admin"
+    // arahkan ke email admin yang terdaftar di database
+    if ($identitas === 'admin') {
+        $identitas = 'admin@admin.com';
+    } '';
+
     // 1. Periksa login admin melalui tabel user
     $stmt = mysqli_prepare(
         $koneksi,
@@ -40,7 +46,7 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $row['nama'];
             $_SESSION['role'] = 'admin';
 
-            header("Location: ../admin/dashboardAdmin.php");
+            header("Location: ../admin/dashboard.php");
             exit;
         }
     }
